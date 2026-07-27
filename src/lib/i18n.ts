@@ -100,6 +100,10 @@ export const translations = {
     topic_feelings: "Cảm xúc",
     topic_school_supplies: "Đồ dùng học tập",
     topic_family: "Gia đình",
+    topic_vegetables: "Rau củ quả",
+    topic_kitchen_utensils: "Đồ dùng nhà bếp",
+    topic_living_room: "Đồ dùng phòng khách",
+    topic_bedroom: "Đồ dùng phòng ngủ",
 
     footer_note: "Dành cho bé học tiếng Anh cùng ba mẹ.",
   },
@@ -203,6 +207,10 @@ export const translations = {
     topic_feelings: "Feelings",
     topic_school_supplies: "School Supplies",
     topic_family: "Family",
+    topic_vegetables: "Vegetables",
+    topic_kitchen_utensils: "Kitchen Utensils",
+    topic_living_room: "Living Room",
+    topic_bedroom: "Bedroom Furnishings",
 
     footer_note: "Made for little learners and their parents.",
   },

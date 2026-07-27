@@ -25,6 +25,73 @@ export interface VocabTopic {
 
 const w = (en: string, vi: string, ipa?: string): Bilingual => ({ en, vi, ipa });
 
+const ONES_EN = ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
+const TEENS_EN = ["Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+const TENS_EN = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+
+const ONES_VI = ["không", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"];
+const TENS_VI = ["", "", "hai mươi", "ba mươi", "bốn mươi", "năm mươi", "sáu mươi", "bảy mươi", "tám mươi", "chín mươi"];
+
+const ONES_IPA = ["/ˈzɪroʊ/", "/wʌn/", "/tuː/", "/θriː/", "/fɔːr/", "/faɪv/", "/sɪks/", "/ˈsɛvən/", "/eɪt/", "/naɪn/"];
+const TEENS_IPA = ["/tɛn/", "/ɪˈlɛvən/", "/twɛlv/", "/θɜːrˈtiːn/", "/fɔːrˈtiːn/", "/fɪfˈtiːn/", "/sɪksˈtiːn/", "/ˌsɛvənˈtiːn/", "/eɪˈtiːn/", "/naɪnˈtiːn/"];
+const TENS_IPA = ["", "", "/ˈtwɛnti/", "/ˈθɜːrti/", "/ˈfɔːrti/", "/ˈfɪfti/", "/ˈsɪksti/", "/ˈsɛvənti/", "/ˈeɪti/", "/ˈnaɪnti/"];
+
+function digitToEmoji(n: number): string {
+  if (n <= 10) {
+    const emojis = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
+    return emojis[n];
+  }
+  if (n === 100) return "💯";
+  return n.toString();
+}
+
+function generateNumbersItems(): VocabItem[] {
+  const items: VocabItem[] = [];
+
+  for (let n = 0; n <= 100; n++) {
+    let word: Bilingual;
+
+    if (n < 10) {
+      word = w(ONES_EN[n], `Số ${ONES_VI[n]}`, ONES_IPA[n]);
+    } else if (n < 20) {
+      const viName = n === 15 ? "Số mười lăm" : `Số mười ${ONES_VI[n - 10]}`;
+      word = w(TEENS_EN[n - 10], viName, TEENS_IPA[n - 10]);
+    } else if (n === 100) {
+      word = w("One Hundred", "Số một trăm", "/wʌn ˈhʌndrəd/");
+    } else {
+      const tensDigit = Math.floor(n / 10);
+      const onesDigit = n % 10;
+      const tensEn = TENS_EN[tensDigit];
+      const tensVi = TENS_VI[tensDigit];
+      const tensIpa = TENS_IPA[tensDigit].slice(1, -1);
+
+      if (onesDigit === 0) {
+        word = w(tensEn, `Số ${tensVi}`, `/${tensIpa}/`);
+      } else {
+        const enWord = `${tensEn}-${ONES_EN[onesDigit]}`;
+        let onesVi = ONES_VI[onesDigit];
+        if (onesDigit === 1) onesVi = "mốt";
+        else if (onesDigit === 4) onesVi = "tư";
+        else if (onesDigit === 5) onesVi = "lăm";
+
+        const viWord = `Số ${tensVi} ${onesVi}`;
+        const onesIpaClean = ONES_IPA[onesDigit].slice(1, -1);
+        const ipaWord = `/${tensIpa}-${onesIpaClean}/`;
+
+        word = w(enWord, viWord, ipaWord);
+      }
+    }
+
+    items.push({
+      id: `num_${n}`,
+      emoji: digitToEmoji(n),
+      word,
+    });
+  }
+
+  return items;
+}
+
 export const vocabularyTopics: VocabTopic[] = [
   {
     id: "colors",
@@ -57,26 +124,7 @@ export const vocabularyTopics: VocabTopic[] = [
     nameKey: "topic_numbers",
     emoji: "🔢",
     gradient: "from-sky-200 via-cyan-100 to-blue-200",
-    items: [
-      { id: "zero", emoji: "0️⃣", word: w("Zero", "Số không", "/ˈzɪroʊ/") },
-      { id: "one", emoji: "1️⃣", word: w("One", "Số một", "/wʌn/") },
-      { id: "two", emoji: "2️⃣", word: w("Two", "Số hai", "/tuː/") },
-      { id: "three", emoji: "3️⃣", word: w("Three", "Số ba", "/θriː/") },
-      { id: "four", emoji: "4️⃣", word: w("Four", "Số bốn", "/fɔr/") },
-      { id: "five", emoji: "5️⃣", word: w("Five", "Số năm", "/faɪv/") },
-      { id: "six", emoji: "6️⃣", word: w("Six", "Số sáu", "/sɪks/") },
-      { id: "seven", emoji: "7️⃣", word: w("Seven", "Số bảy", "/ˈsɛvən/") },
-      { id: "eight", emoji: "8️⃣", word: w("Eight", "Số tám", "/eɪt/") },
-      { id: "nine", emoji: "9️⃣", word: w("Nine", "Số chín", "/naɪn/") },
-      { id: "ten", emoji: "🔟", word: w("Ten", "Số mười", "/tɛn/") },
-      { id: "eleven", emoji: "1️⃣1️⃣", word: w("Eleven", "Số mười một", "/ɪˈlɛvən/") },
-      { id: "twelve", emoji: "1️⃣2️⃣", word: w("Twelve", "Số mười hai", "/twɛlv/") },
-      { id: "thirteen", emoji: "1️⃣3️⃣", word: w("Thirteen", "Số mười ba", "/θɜrˈtiːn/") },
-      { id: "fourteen", emoji: "1️⃣4️⃣", word: w("Fourteen", "Số mười bốn", "/fɔrˈtiːn/") },
-      { id: "fifteen", emoji: "1️⃣5️⃣", word: w("Fifteen", "Số mười lăm", "/fɪfˈtiːn/") },
-      { id: "twenty", emoji: "2️⃣0️⃣", word: w("Twenty", "Số hai mươi", "/ˈtwɛnti/") },
-      { id: "hundred", emoji: "💯", word: w("Hundred", "Số một trăm", "/ˈhʌndrəd/") },
-    ],
+    items: generateNumbersItems(),
     questionTemplates: (item) => [
       w(`Can you count to ${item.word.en.toLowerCase()}?`, `Con đếm đến ${item.word.vi.toLowerCase()} được không?`),
       w(`Show me ${item.word.en.toLowerCase()} fingers!`, `Con giơ ${item.word.vi.toLowerCase()} ngón tay lên nhé!`),
@@ -103,6 +151,21 @@ export const vocabularyTopics: VocabTopic[] = [
       { id: "avocado", emoji: "🥑", word: w("Avocado", "Quả bơ", "/ˌævəˈkɑːdoʊ/") },
       { id: "kiwi", emoji: "🥝", word: w("Kiwi", "Quả kiwi", "/ˈkiːwiː/") },
       { id: "pear", emoji: "🍐", word: w("Pear", "Quả lê", "/pɛr/") },
+      { id: "dragon_fruit", emoji: "🐉", word: w("Dragon Fruit", "Quả thanh long", "/ˈdræɡən fruːt/") },
+      { id: "durian", emoji: "🍈", word: w("Durian", "Quả sầu riêng", "/ˈdʊriən/") },
+      { id: "papaya", emoji: "🍈", word: w("Papaya", "Quả đu đủ", "/pəˈpaɪə/") },
+      { id: "mangosteen", emoji: "🟣", word: w("Mangosteen", "Quả măng cụt", "/ˈmæŋɡəstiːn/") },
+      { id: "lychee", emoji: "🔴", word: w("Lychee", "Quả vải", "/ˈliːtʃiː/") },
+      { id: "rambutan", emoji: "🔴", word: w("Rambutan", "Quả chôm chôm", "/ræmˈbuːtən/") },
+      { id: "guava", emoji: "🍏", word: w("Guava", "Quả ổi", "/ˈɡwɑːvə/") },
+      { id: "passion_fruit", emoji: "🟣", word: w("Passion Fruit", "Quả chanh dây", "/ˈpæʃən fruːt/") },
+      { id: "pomegranate", emoji: "🍎", word: w("Pomegranate", "Quả lựu", "/ˈpɑːmɪɡrænɪt/") },
+      { id: "blueberry", emoji: "🫐", word: w("Blueberry", "Quả việt quất", "/ˈbluːbɛri/") },
+      { id: "blackberry", emoji: "🫐", word: w("Blackberry", "Quả mâm xôi", "/ˈblækbɛri/") },
+      { id: "melon", emoji: "🍈", word: w("Melon", "Quả dưa lưới", "/ˈmɛlən/") },
+      { id: "tangerine", emoji: "🍊", word: w("Tangerine", "Quả quýt", "/ˌtændʒəˈriːn/") },
+      { id: "plum", emoji: "🍑", word: w("Plum", "Quả mận", "/plʌm/") },
+      { id: "fig", emoji: "🫐", word: w("Fig", "Quả sung", "/fɪɡ/") },
     ],
     questionTemplates: (item) => [
       w("What fruit is this?", "Đây là quả gì?"),
@@ -123,8 +186,6 @@ export const vocabularyTopics: VocabTopic[] = [
       { id: "duck", emoji: "🦆", word: w("Duck", "Con vịt", "/dʌk/") },
       { id: "elephant", emoji: "🐘", word: w("Elephant", "Con voi", "/ˈɛləfənt/") },
       { id: "lion", emoji: "🦁", word: w("Lion", "Con sư tử", "/ˈlaɪən/") },
-      { id: "fish", emoji: "🐟", word: w("Fish", "Con cá", "/fɪʃ/") },
-      { id: "bird", emoji: "🐦", word: w("Bird", "Con chim", "/bɜrd/") },
       { id: "tiger", emoji: "🐯", word: w("Tiger", "Con hổ", "/ˈtaɪɡər/") },
       { id: "bear", emoji: "🐻", word: w("Bear", "Con gấu", "/bɛr/") },
       { id: "rabbit", emoji: "🐰", word: w("Rabbit", "Con thỏ", "/ˈræbɪt/") },
@@ -135,6 +196,24 @@ export const vocabularyTopics: VocabTopic[] = [
       { id: "turtle", emoji: "🐢", word: w("Turtle", "Con rùa", "/ˈtɜrtəl/") },
       { id: "penguin", emoji: "🐧", word: w("Penguin", "Con chim cánh cụt", "/ˈpɛnɡwɪn/") },
       { id: "butterfly", emoji: "🦋", word: w("Butterfly", "Con bướm", "/ˈbʌtərˌflaɪ/") },
+      { id: "fish", emoji: "🐟", word: w("Fish", "Con cá", "/fɪʃ/") },
+      { id: "bird", emoji: "🐦", word: w("Bird", "Con chim", "/bɜrd/") },
+      { id: "giraffe", emoji: "🦒", word: w("Giraffe", "Con hươu cao cổ", "/dʒɪˈræf/") },
+      { id: "zebra", emoji: "🦓", word: w("Zebra", "Con ngựa vằn", "/ˈziːbrə/") },
+      { id: "hippo", emoji: "🦛", word: w("Hippo", "Con hà mã", "/ˈhɪpoʊ/") },
+      { id: "rhino", emoji: "🦏", word: w("Rhino", "Con tê giác", "/ˈraɪnoʊ/") },
+      { id: "crocodile", emoji: "🐊", word: w("Crocodile", "Con cá sấu", "/ˈkrɑːkədaɪl/") },
+      { id: "dolphin", emoji: "🐬", word: w("Dolphin", "Con cá heo", "/ˈdɑːlfɪn/") },
+      { id: "whale", emoji: "🐳", word: w("Whale", "Con cá voi", "/weɪl/") },
+      { id: "octopus", emoji: "🐙", word: w("Octopus", "Con bạch tuộc", "/ˈɑːktəpəs/") },
+      { id: "crab", emoji: "🦀", word: w("Crab", "Con cua", "/kræb/") },
+      { id: "owl", emoji: "🦉", word: w("Owl", "Con chim cú", "/aʊl/") },
+      { id: "bee", emoji: "🐝", word: w("Bee", "Con ong", "/biː/") },
+      { id: "ant", emoji: "🐜", word: w("Ant", "Con kiến", "/ænt/") },
+      { id: "kangaroo", emoji: "🦘", word: w("Kangaroo", "Con chuột túi", "/ˌkæŋɡəˈruː/") },
+      { id: "panda", emoji: "🐼", word: w("Panda", "Con gấu trúc", "/ˈpændə/") },
+      { id: "koala", emoji: "🐨", word: w("Koala", "Con gấu koala", "/koʊˈɑːlə/") },
+      { id: "dinosaur", emoji: "🦖", word: w("Dinosaur", "Con khủng long", "/ˈdaɪnəsɔːr/") },
     ],
     questionTemplates: (item) => [
       w("What animal is this?", "Đây là con gì?"),
@@ -233,7 +312,8 @@ export const vocabularyTopics: VocabTopic[] = [
       { id: "scissors", emoji: "✂️", word: w("Scissors", "Kéo cắt giấy", "/ˈsɪzərz/") },
       { id: "crayon", emoji: "🖍️", word: w("Crayon", "Bút màu sáp", "/ˈkreɪˌɑn/") },
       { id: "pencil_case", emoji: "👝", word: w("Pencil Case", "Hộp bút", "/ˈpɛnsəl keɪs/") },
-      { id: "desk", emoji: "🪑", word: w("Desk", "Bàn học", "/dɛsk/") },
+      { id: "desk", emoji: "🪵", word: w("Desk", "Bàn học", "/dɛsk/") },
+      { id: "chair", emoji: "🪑", word: w("Chair", "Ghế học", "/tʃɛr/") },
     ],
     questionTemplates: (item) => [
       w("What is this?", "Đây là đồ dùng gì?"),
@@ -261,6 +341,118 @@ export const vocabularyTopics: VocabTopic[] = [
     questionTemplates: (item) => [
       w("Who is this?", "Đây là ai?"),
       w(`Do you love your ${item.word.en.toLowerCase()}?`, `Con có yêu ${item.word.vi.toLowerCase()} của mình không?`),
+    ],
+  },
+  {
+    id: "vegetables",
+    nameKey: "topic_vegetables",
+    emoji: "🥦",
+    gradient: "from-emerald-200 via-lime-100 to-teal-200",
+    items: [
+      { id: "carrot", emoji: "🥕", word: w("Carrot", "Củ cà rốt", "/ˈkærət/") },
+      { id: "broccoli", emoji: "🥦", word: w("Broccoli", "Bông cải xanh", "/ˈbrɑːkəli/") },
+      { id: "tomato", emoji: "🍅", word: w("Tomato", "Quả cà chua", "/təˈmeɪtoʊ/") },
+      { id: "potato", emoji: "🥔", word: w("Potato", "Củ khoai tây", "/pəˈteɪtoʊ/") },
+      { id: "sweet_potato", emoji: "🍠", word: w("Sweet Potato", "Củ khoai lang", "/swiːt pəˈteɪtoʊ/") },
+      { id: "corn", emoji: "🌽", word: w("Corn", "Bắp nếp / Ngô", "/kɔːrn/") },
+      { id: "cucumber", emoji: "🥒", word: w("Cucumber", "Quả dưa leo", "/ˈkjuːkʌmbər/") },
+      { id: "luffa", emoji: "🫛", word: w("Luffa (Sponge Gourd)", "Quả mướp", "/ˈlʌfə/") },
+      { id: "bitter_melon", emoji: "🍈", word: w("Bitter Melon", "Khổ qua / Mướp đắng", "/ˈbɪtər ˈmɛlən/") },
+      { id: "bottle_gourd", emoji: "🍐", word: w("Bottle Gourd", "Trái bầu", "/ˈbɑːtəl ɡɔːrd/") },
+      { id: "squash", emoji: "🫑", word: w("Squash", "Quả bí đỏ", "/skwɑːʃ/") },
+      { id: "malabar_spinach", emoji: "🍃", word: w("Malabar Spinach", "Rau mồng tơi", "/ˈmæləbɑːr ˈspɪnɪtʃ/") },
+      { id: "choy_sum", emoji: "🥬", word: w("Choy Sum", "Rau cải ngọt", "/tʃɔɪ sʌm/") },
+      { id: "water_spinach", emoji: "🌿", word: w("Water Spinach", "Rau muống", "/ˈwɔːtər ˈspɪnɪtʃ/") },
+      { id: "cabbage", emoji: "🥗", word: w("Cabbage", "Bắp cải", "/ˈkæbɪdʒ/") },
+      { id: "radish", emoji: "🫚", word: w("Radish", "Củ cải trắng", "/ˈrædɪʃ/") },
+      { id: "pumpkin", emoji: "🎃", word: w("Pumpkin", "Quả bí ngô", "/ˈpʌmpkɪn/") },
+      { id: "onion", emoji: "🧅", word: w("Onion", "Củ hành tây", "/ˈʌnjən/") },
+      { id: "garlic", emoji: "🧄", word: w("Garlic", "Củ tỏi", "/ˈɡɑːrlɪk/") },
+      { id: "mushroom", emoji: "🍄", word: w("Mushroom", "Cây nấm", "/ˈmʌʃruːm/") },
+      { id: "eggplant", emoji: "🍆", word: w("Eggplant", "Quả cà tím", "/ˈɛɡˌplænt/") },
+      { id: "chili_pepper", emoji: "🌶️", word: w("Chili Pepper", "Quả ớt", "/ˈtʃɪli ˈpɛpər/") },
+    ],
+    questionTemplates: (item) => [
+      w("What vegetable is this?", "Đây là loại rau củ gì?"),
+      w(`Do you like to eat ${item.word.en.toLowerCase()}?`, `Con có thích ăn ${item.word.vi.toLowerCase()} không?`),
+    ],
+  },
+  {
+    id: "kitchen-utensils",
+    nameKey: "topic_kitchen_utensils",
+    emoji: "🍳",
+    gradient: "from-amber-200 via-yellow-100 to-orange-200",
+    items: [
+      { id: "spoon", emoji: "🥄", word: w("Spoon", "Cái thìa / Muỗng", "/spuːn/") },
+      { id: "fork", emoji: "🍴", word: w("Fork", "Cái nĩa", "/fɔːrk/") },
+      { id: "knife", emoji: "🔪", word: w("Knife", "Con dao", "/naɪf/") },
+      { id: "chopsticks", emoji: "🥢", word: w("Chopsticks", "Đôi đũa", "/ˈtʃɑːpstɪks/") },
+      { id: "bowl", emoji: "🥣", word: w("Bowl", "Cái bát / Chén", "/boʊl/") },
+      { id: "plate", emoji: "🍽️", word: w("Plate", "Cái đĩa", "/pleɪt/") },
+      { id: "cup", emoji: "🥤", word: w("Cup", "Cái cốc / Ly", "/kʌp/") },
+      { id: "teapot", emoji: "🫖", word: w("Teapot", "Ấm trà", "/ˈtiːpɑːt/") },
+      { id: "pot", emoji: "🍲", word: w("Cooking Pot", "Cái nồi", "/pɑːt/") },
+      { id: "frying_pan", emoji: "🍳", word: w("Frying Pan", "Cái chảo", "/ˈfraɪɪŋ pæn/") },
+      { id: "kettle", emoji: "🫖", word: w("Kettle", "Ấm đun nước", "/ˈkɛtəl/") },
+      { id: "bottle", emoji: "🍾", word: w("Bottle", "Chai nước", "/ˈbɑːtəl/") },
+      { id: "fridge", emoji: "🧊", word: w("Refrigerator (Fridge)", "Tủ lạnh", "/rɪˈfrɪdʒəˌreɪtər/") },
+      { id: "dishwasher", emoji: "🫧", word: w("Dishwasher", "Máy rửa bát / Máy rửa chén", "/ˈdɪʃˌwɑːʃər/") },
+      { id: "water_purifier", emoji: "💧", word: w("Water Purifier", "Máy lọc nước", "/ˈwɔːtər ˈpjʊrəˌfaɪər/") },
+    ],
+    questionTemplates: (item) => [
+      w("What kitchen tool is this?", "Đây là đồ dùng nhà bếp gì?"),
+      w(`Do you use a ${item.word.en.toLowerCase()}?`, `Con có dùng ${item.word.vi.toLowerCase()} không?`),
+    ],
+  },
+  {
+    id: "living-room",
+    nameKey: "topic_living_room",
+    emoji: "🛋️",
+    gradient: "from-rose-200 via-purple-100 to-sky-200",
+    items: [
+      { id: "sofa", emoji: "🛋️", word: w("Sofa (Couch)", "Ghế sofa / Ghế bành", "/ˈsoʊfə/") },
+      { id: "television", emoji: "📺", word: w("Television (TV)", "Tivi", "/ˈtɛləˌvɪʒən/") },
+      { id: "table", emoji: "🪑", word: w("Coffee Table", "Bàn trà / Bàn phòng khách", "/ˈkɑːfi ˈteɪbəl/") },
+      { id: "lamp", emoji: "💡", word: w("Lamp", "Đèn bàn / Đèn phòng", "/læmp/") },
+      { id: "clock", emoji: "⏰", word: w("Clock", "Đồng hồ treo tường", "/klɑːk/") },
+      { id: "picture", emoji: "🖼️", word: w("Picture Frame", "Bức tranh / Khung ảnh", "/ˈpɪktʃər/") },
+      { id: "fan", emoji: "🪭", word: w("Fan", "Quạt máy", "/fæn/") },
+      { id: "air_conditioner", emoji: "❄️", word: w("Air Conditioner", "Máy điều hòa / Máy lạnh", "/ˈɛr kənˈdɪʃənər/") },
+      { id: "carpet", emoji: "🪢", word: w("Carpet (Rug)", "Thảm trải sàn", "/ˈkɑːrpət/") },
+      { id: "curtain", emoji: "🪟", word: w("Curtains", "Rèm cửa", "/ˈkɜːrtənz/") },
+      { id: "plant", emoji: "🪴", word: w("Houseplant", "Cây cảnh trong nhà", "/ˈhaʊsˌplænt/") },
+      { id: "remote_control", emoji: "📻", word: w("Remote Control", "Điều khiển từ xa", "/rɪˈmoʊt kənˈtroʊl/") },
+      { id: "fish_tank", emoji: "🐠", word: w("Fish Tank (Aquarium)", "Bể cá cảnh", "/fɪʃ tæŋk/") },
+      { id: "hammock", emoji: "🏕️", word: w("Hammock", "Cái võng", "/ˈhæmək/") },
+      { id: "robot_vacuum", emoji: "🤖", word: w("Robot Vacuum", "Robot hút bụi", "/ˈroʊbɑːt ˈvækjuːm/") },
+    ],
+    questionTemplates: (item) => [
+      w("What is this in the living room?", "Đây là món đồ gì trong phòng khách?"),
+      w(`Can you see a ${item.word.en.toLowerCase()}?`, `Con có thấy ${item.word.vi.toLowerCase()} không?`),
+    ],
+  },
+  {
+    id: "bedroom",
+    nameKey: "topic_bedroom",
+    emoji: "🛏️",
+    gradient: "from-indigo-200 via-sky-100 to-purple-200",
+    items: [
+      { id: "bed", emoji: "🛏️", word: w("Bed", "Cái giường", "/bɛd/") },
+      { id: "pillow", emoji: "🛏️", word: w("Pillow", "Cái gối", "/ˈpɪloʊ/") },
+      { id: "blanket", emoji: "🛋️", word: w("Blanket (Quilt)", "Cái chăn / Mền", "/ˈblæŋkət/") },
+      { id: "wardrobe", emoji: "🚪", word: w("Wardrobe (Closet)", "Tủ quần áo", "/ˈwɔːrdroʊb/") },
+      { id: "nightstand", emoji: "🪵", word: w("Nightstand (Bedside Table)", "Tủ đầu giường", "/ˈnaɪtˌstænd/") },
+      { id: "alarm_clock", emoji: "⏰", word: w("Alarm Clock", "Đồng hồ báo thức", "/əˈlɑːrm klɑːk/") },
+      { id: "mirror", emoji: "🪞", word: w("Mirror", "Gương soi", "/ˈmɪrər/") },
+      { id: "comb", emoji: "🪮", word: w("Comb (Hairbrush)", "Cái lược", "/koʊm/") },
+      { id: "pajamas", emoji: "👔", word: w("Pajamas", "Bộ đồ ngủ", "/pəˈdʒɑːməz/") },
+      { id: "slipper", emoji: "🩴", word: w("Slippers", "Dép đi trong nhà", "/ˈslɪpərz/") },
+      { id: "toy_box", emoji: "🧸", word: w("Toy Chest (Toy Box)", "Rương / Hộp đựng đồ chơi", "/tɔɪ tʃɛst/") },
+      { id: "desk_lamp", emoji: "💡", word: w("Bedside Lamp", "Đèn ngủ", "/ˈbɛdˌsaɪd læmp/") },
+    ],
+    questionTemplates: (item) => [
+      w("What is this in the bedroom?", "Đây là đồ dùng gì trong phòng ngủ?"),
+      w(`Do you have a ${item.word.en.toLowerCase()} in your room?`, `Phòng con có ${item.word.vi.toLowerCase()} không?`),
     ],
   },
 ];

@@ -7,11 +7,28 @@ import { useLanguage } from "@/lib/language-context";
 import { speakEnglish, speakVietnamese } from "@/lib/speech";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { CUSTOM_VEGETABLE_SVGS } from "@/components/vegetable-svgs";
+import { CUSTOM_FRUIT_SVGS } from "@/components/fruit-svgs";
+import { CUSTOM_SCHOOL_SVGS } from "@/components/school-svgs";
+import { CUSTOM_LIVING_ROOM_SVGS } from "@/components/living-room-svgs";
+import { CUSTOM_KITCHEN_SVGS } from "@/components/kitchen-svgs";
+import { CUSTOM_BEDROOM_SVGS } from "@/components/bedroom-svgs";
+import { NumberBadge } from "./number-badge";
 
 export function VocabItemCard({ item }: { item: VocabItem }) {
   const { language } = useLanguage();
   const [active, setActive] = useState(false);
   const [viActive, setViActive] = useState(false);
+
+  const isNumber = item.id.startsWith("num_");
+  const numberVal = isNumber ? parseInt(item.id.replace("num_", ""), 10) : 0;
+  const CustomSvg =
+    CUSTOM_VEGETABLE_SVGS[item.id] ||
+    CUSTOM_FRUIT_SVGS[item.id] ||
+    CUSTOM_SCHOOL_SVGS[item.id] ||
+    CUSTOM_LIVING_ROOM_SVGS[item.id] ||
+    CUSTOM_KITCHEN_SVGS[item.id] ||
+    CUSTOM_BEDROOM_SVGS[item.id];
 
   const handleTap = () => {
     speakEnglish(item.word.en);
@@ -39,9 +56,15 @@ export function VocabItemCard({ item }: { item: VocabItem }) {
         active && "ring-4 ring-primary/50"
       )}
     >
-      <span className="text-6xl" aria-hidden>
-        {item.emoji}
-      </span>
+      {isNumber ? (
+        <NumberBadge number={numberVal} />
+      ) : CustomSvg ? (
+        <CustomSvg className="size-16" />
+      ) : (
+        <span className="text-6xl" aria-hidden>
+          {item.emoji}
+        </span>
+      )}
       <div className="flex flex-col items-center gap-0.5">
         <span className="font-heading text-lg font-extrabold text-foreground">{item.word.en}</span>
         {item.word.ipa && (
@@ -55,11 +78,11 @@ export function VocabItemCard({ item }: { item: VocabItem }) {
             if (e.key === "Enter" || e.key === " ") handleTapVi(e);
           }}
           className={cn(
-            "mt-1 flex items-center gap-1.5 rounded-full bg-muted/50 px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+            "mt-1 flex items-center gap-1.5 rounded-full bg-muted/60 px-3.5 py-1.5 text-xs font-bold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:scale-95",
             viActive && "bg-primary/20 text-primary"
           )}
         >
-          <Volume2 className="size-3" />
+          <Volume2 className="size-4" />
           {item.word.vi}
         </button>
       )}

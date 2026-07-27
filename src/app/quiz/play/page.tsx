@@ -164,9 +164,9 @@ function QuizGameContent() {
       <div className="mb-6 flex items-center justify-between gap-4">
         <Link
           href="/quiz"
-          className="inline-flex items-center gap-1.5 text-sm font-bold text-muted-foreground hover:text-foreground"
+          className="inline-flex items-center gap-2 rounded-full border bg-card px-4 py-2.5 text-sm font-extrabold text-foreground shadow-xs transition-all hover:bg-accent hover:shadow-md active:scale-95 sm:px-5 sm:py-2.5 sm:text-base"
         >
-          <ArrowLeft className="size-4" />
+          <ArrowLeft className="size-5 text-primary sm:size-6" />
           <span>{t("quiz_back_to_modes")}</span>
         </Link>
 

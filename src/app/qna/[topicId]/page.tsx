@@ -23,10 +23,10 @@ export default function QnaTopicPage() {
     <div className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
       <Link
         href="/qna"
-        className="mb-4 inline-flex items-center gap-1.5 text-sm font-bold text-muted-foreground hover:text-foreground"
+        className="mb-6 inline-flex items-center gap-2 rounded-full border bg-card px-4 py-2.5 text-sm font-extrabold text-foreground shadow-xs transition-all hover:bg-accent hover:shadow-md active:scale-95 sm:px-5 sm:py-3 sm:text-base"
       >
-        <ArrowLeft className="size-4" />
-        {t("qna_back")}
+        <ArrowLeft className="size-5 text-primary sm:size-6" />
+        <span>{t("qna_back")}</span>
       </Link>
 
       <div className={`mb-6 rounded-3xl bg-gradient-to-br ${category.gradient} px-6 py-6 text-center`}>

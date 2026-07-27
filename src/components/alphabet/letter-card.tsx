@@ -62,9 +62,9 @@ export function LetterCard({ letter, index, caseMode = "lowercase" }: LetterCard
           type="button"
           onClick={handleSpeak}
           aria-label={t("alphabet_speak")}
-          className="absolute top-2 right-2 rounded-full bg-white/70 p-1.5 text-foreground/70 transition-colors hover:bg-white hover:text-primary active:scale-90"
+          className="absolute top-2 right-2 rounded-full bg-white/85 p-2.5 sm:p-3 text-primary shadow-xs transition-all hover:bg-white hover:scale-110 active:scale-90"
         >
-          <Volume2 className="size-4" />
+          <Volume2 className="size-5 sm:size-6" />
         </button>
         <span className="font-heading text-3xl font-extrabold text-foreground sm:text-4xl md:text-5xl">
           {displayLetter}
@@ -88,9 +88,9 @@ export function LetterCard({ letter, index, caseMode = "lowercase" }: LetterCard
           <button
             type="button"
             onClick={() => speakEnglish(letter.speakAs || letter.letter.toLowerCase())}
-            className="mx-auto inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-xs transition-transform active:scale-95"
+            className="mx-auto inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-base font-extrabold text-primary-foreground shadow-sm transition-transform hover:bg-primary/90 active:scale-95"
           >
-            <Volume2 className="size-4" />
+            <Volume2 className="size-5" />
             {t("alphabet_speak")}
           </button>
         </DialogContent>

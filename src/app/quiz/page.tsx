@@ -77,36 +77,36 @@ export default function QuizSelectionPage() {
         <p className="mt-2 text-sm text-muted-foreground sm:text-base">{t("quiz_subtitle")}</p>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {modes.map((mode) => {
           const Icon = mode.icon;
           return (
             <Link key={mode.id} href={`/quiz/play?mode=${mode.id}`} className="group block">
               <Card
-                className={`flex h-full flex-col justify-between border-none bg-gradient-to-br ${mode.gradient} p-6 shadow-md transition-all duration-200 group-hover:-translate-y-1.5 group-hover:shadow-xl active:scale-98`}
+                className={`flex h-full flex-col justify-between rounded-3xl border-none bg-gradient-to-br ${mode.gradient} p-7 shadow-md transition-all duration-200 group-hover:-translate-y-1.5 group-hover:shadow-xl group-active:scale-95 sm:p-8`}
               >
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="text-5xl transition-transform group-hover:scale-110" aria-hidden>
+                    <span className="text-5xl sm:text-6xl transition-transform group-hover:scale-110" aria-hidden>
                       {mode.emoji}
                     </span>
-                    <span className="rounded-full bg-white/70 p-2 text-foreground/80 shadow-xs backdrop-blur-xs">
-                      <Icon className="size-5" />
+                    <span className="rounded-full bg-white/80 p-3 text-foreground/80 shadow-xs backdrop-blur-xs">
+                      <Icon className="size-6 text-primary" />
                     </span>
                   </div>
 
-                  <h2 className="mt-5 font-heading text-2xl font-extrabold text-foreground group-hover:text-primary transition-colors">
+                  <h2 className="mt-6 font-heading text-2xl font-black text-foreground group-hover:text-primary transition-colors sm:text-3xl">
                     {t(mode.titleKey)}
                   </h2>
-                  <p className="mt-2 text-xs font-semibold text-foreground/75 leading-relaxed">
+                  <p className="mt-2.5 text-xs font-bold text-foreground/80 leading-relaxed sm:text-sm">
                     {t(mode.descKey)}
                   </p>
                 </div>
 
-                <div className="mt-6 flex items-center justify-between border-t border-black/5 pt-4">
-                  <span className="text-xs font-extrabold text-primary">{t("quiz_start")}</span>
-                  <span className="rounded-full bg-primary p-2 text-primary-foreground transition-transform group-hover:translate-x-1">
-                    <ArrowRight className="size-4" />
+                <div className="mt-7 flex items-center justify-between border-t border-black/10 pt-5">
+                  <span className="text-sm font-black text-primary sm:text-base">{t("quiz_start")}</span>
+                  <span className="rounded-full bg-primary p-2.5 text-primary-foreground shadow-xs transition-transform group-hover:translate-x-1">
+                    <ArrowRight className="size-5" />
                   </span>
                 </div>
               </Card>
