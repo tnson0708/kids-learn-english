@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
-import { BookOpen, Gamepad2, HelpCircle, Home, ImageIcon, Menu, X } from "lucide-react";
+import { BookOpen, Gamepad2, HelpCircle, Home, ImageIcon } from "lucide-react";
 import { LanguageToggle } from "@/components/language-toggle";
 import { VoiceToggle } from "@/components/voice-toggle";
 import { useLanguage } from "@/lib/language-context";
@@ -12,13 +11,6 @@ import { cn } from "@/lib/utils";
 export function Nav() {
   const pathname = usePathname();
   const { t } = useLanguage();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [prevPathname, setPrevPathname] = useState(pathname);
-
-  if (pathname !== prevPathname) {
-    setPrevPathname(pathname);
-    setMobileOpen(false);
-  }
 
   const links = [
     { href: "/", label: t("nav_home"), icon: Home },
@@ -29,17 +21,52 @@ export function Nav() {
   ];
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      <div className="mx-auto flex h-20 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
-        <Link
-          href="/"
-          className="flex items-center gap-2.5 font-heading text-xl font-black tracking-tight text-primary shrink-0 sm:text-2xl"
-        >
-          <span className="text-3xl sm:text-4xl" aria-hidden>🐝</span>
-          <span>{t("app_name")}</span>
-        </Link>
+    <>
+      {/* Top Header */}
+      <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+        <div className="mx-auto flex h-16 sm:h-20 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
+          <Link
+            href="/"
+            className="flex items-center gap-2 font-heading text-xl font-black tracking-tight text-primary shrink-0 sm:text-2xl"
+          >
+            <span className="text-2xl sm:text-3xl" aria-hidden>🐝</span>
+            <span>{t("app_name")}</span>
+          </Link>
 
-        <nav className="hidden md:flex items-center gap-2">
+          {/* Desktop Navigation Links */}
+          <nav className="hidden lg:flex items-center gap-2">
+            {links.map((link) => {
+              const Icon = link.icon;
+              const active = link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    "inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-extrabold whitespace-nowrap transition-all active:scale-95 lg:px-5 lg:py-3 lg:text-base",
+                    active
+                      ? "bg-primary text-primary-foreground shadow-xs"
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  )}
+                >
+                  <Icon className="size-4.5 lg:size-5 shrink-0" />
+                  <span>{link.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Top Toggles (Voice & Language) */}
+          <div className="flex items-center gap-2 shrink-0">
+            <VoiceToggle />
+            <LanguageToggle />
+          </div>
+        </div>
+      </header>
+
+      {/* Mobile & iPad Fixed Bottom Navigation Bar (No horizontal scroll, 100% full width touch targets) */}
+      <nav aria-label="Mobile Navigation" className="fixed bottom-0 left-0 right-0 z-50 lg:hidden border-t bg-background/98 backdrop-blur shadow-2xl pb-safe">
+        <div className="mx-auto grid h-16 sm:h-20 max-w-md sm:max-w-xl grid-cols-5 items-center px-1">
           {links.map((link) => {
             const Icon = link.icon;
             const active = link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
@@ -48,58 +75,28 @@ export function Nav() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-extrabold whitespace-nowrap transition-all active:scale-95 lg:px-5 lg:py-3 lg:text-base",
+                  "flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-2xl transition-all active:scale-90",
                   active
-                    ? "bg-primary text-primary-foreground shadow-xs"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                    ? "text-primary font-black scale-105"
+                    : "text-muted-foreground hover:text-foreground font-bold"
                 )}
               >
-                <Icon className="size-4.5 lg:size-5 shrink-0" />
-                <span>{link.label}</span>
+                <div
+                  className={cn(
+                    "flex items-center justify-center rounded-2xl p-1.5 transition-colors",
+                    active ? "bg-primary/15 text-primary" : "bg-transparent"
+                  )}
+                >
+                  <Icon className="size-5 sm:size-6 shrink-0" />
+                </div>
+                <span className="text-[10px] sm:text-xs text-center leading-none tracking-tight whitespace-nowrap">
+                  {link.label}
+                </span>
               </Link>
             );
           })}
-        </nav>
-
-        <div className="flex items-center gap-2.5 shrink-0">
-          <VoiceToggle />
-          <LanguageToggle />
-
-          <button
-            type="button"
-            onClick={() => setMobileOpen((prev) => !prev)}
-            className="flex md:hidden items-center justify-center rounded-2xl border bg-card p-3 text-muted-foreground shadow-xs transition-colors hover:bg-accent hover:text-foreground active:scale-95"
-            aria-label={mobileOpen ? "Close navigation menu" : "Open navigation menu"}
-          >
-            {mobileOpen ? <X className="size-6" /> : <Menu className="size-6" />}
-          </button>
         </div>
-      </div>
-
-      {mobileOpen && (
-        <div className="md:hidden border-t bg-background/98 p-3 shadow-lg animate-in slide-in-from-top-2 duration-150">
-          <nav className="flex flex-col gap-1">
-            {links.map((link) => {
-              const Icon = link.icon;
-              const active = link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className={cn(
-                    "flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-sm font-bold transition-colors",
-                    active ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent"
-                  )}
-                >
-                  <Icon className="size-4 shrink-0 opacity-80" />
-                  <span>{link.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
-      )}
-    </header>
+      </nav>
+    </>
   );
 }

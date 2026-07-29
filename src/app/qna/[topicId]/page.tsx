@@ -29,14 +29,14 @@ export default function QnaTopicPage() {
         <span>{t("qna_back")}</span>
       </Link>
 
-      <div className={`mb-6 rounded-3xl bg-gradient-to-br ${category.gradient} px-6 py-6 text-center`}>
-        <span className="text-5xl" aria-hidden>
+      <div className={`mb-5 rounded-2xl sm:rounded-3xl bg-gradient-to-br ${category.gradient} px-4 py-4 sm:px-6 sm:py-6 text-center`}>
+        <span className="text-4xl sm:text-5xl" aria-hidden>
           {category.emoji}
         </span>
-        <h1 className="mt-1 font-heading text-2xl font-extrabold text-foreground">
+        <h1 className="mt-1 font-heading text-xl sm:text-2xl font-black text-foreground">
           {title}
         </h1>
-        <p className="mt-1 text-sm font-medium text-foreground/75">{description}</p>
+        <p className="mt-0.5 text-xs sm:text-sm font-semibold text-foreground/75">{description}</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">

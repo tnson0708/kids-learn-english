@@ -192,21 +192,21 @@ function QuizGameContent() {
       </div>
 
       {/* Question Card Header */}
-      <Card className="mb-6 flex flex-col items-center justify-center border-none bg-gradient-to-br from-primary/10 via-primary/5 to-background p-8 text-center shadow-md">
+      <Card className="mb-4 sm:mb-6 flex flex-col items-center justify-center border-none bg-gradient-to-br from-primary/10 via-primary/5 to-background p-4 sm:p-8 text-center shadow-md rounded-2xl sm:rounded-3xl">
         {currentQ.promptEmoji && (
-          <span className="mb-3 text-7xl" aria-hidden>
+          <span className="mb-2 text-5xl sm:text-7xl" aria-hidden>
             {currentQ.promptEmoji}
           </span>
         )}
 
         {currentQ.promptText && (
-          <h2 className="font-heading text-2xl font-extrabold text-foreground sm:text-3xl">
+          <h2 className="font-heading text-xl font-extrabold text-foreground sm:text-3xl">
             {currentQ.promptText}
           </h2>
         )}
 
         {currentQ.promptIpa && (
-          <span className="mt-1 text-sm font-semibold text-muted-foreground">
+          <span className="mt-0.5 text-xs font-semibold text-muted-foreground sm:text-sm">
             {currentQ.promptIpa}
           </span>
         )}
@@ -215,31 +215,31 @@ function QuizGameContent() {
         <button
           type="button"
           onClick={handleReplayPrompt}
-          className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-extrabold text-primary-foreground shadow-sm transition-all hover:bg-primary/90 active:scale-95"
+          className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs sm:text-sm font-extrabold text-primary-foreground shadow-sm transition-all hover:bg-primary/90 active:scale-95"
           title={t("quiz_replay_audio")}
         >
-          <Volume2 className="size-5" />
+          <Volume2 className="size-4 sm:size-5" />
           <span>{t("quiz_replay_audio")}</span>
         </button>
       </Card>
 
       {/* Feedback Messages */}
       {isCorrect === true && (
-        <div className="mb-4 flex items-center justify-center gap-2 rounded-2xl bg-emerald-500/15 p-3 text-emerald-700 dark:text-emerald-300 font-extrabold text-base animate-bounce">
-          <CheckCircle2 className="size-5" />
+        <div className="mb-3 flex items-center justify-center gap-2 rounded-2xl bg-emerald-500/15 p-2.5 text-emerald-700 dark:text-emerald-300 font-extrabold text-sm sm:text-base animate-bounce">
+          <CheckCircle2 className="size-4.5 sm:size-5" />
           <span>{t("quiz_correct_title")}</span>
         </div>
       )}
 
       {isCorrect === false && (
-        <div className="mb-4 flex items-center justify-center gap-2 rounded-2xl bg-rose-500/15 p-3 text-rose-700 dark:text-rose-300 font-extrabold text-base">
-          <XCircle className="size-5" />
+        <div className="mb-3 flex items-center justify-center gap-2 rounded-2xl bg-rose-500/15 p-2.5 text-rose-700 dark:text-rose-300 font-extrabold text-sm sm:text-base">
+          <XCircle className="size-4.5 sm:size-5" />
           <span>{t("quiz_wrong_title")}</span>
         </div>
       )}
 
       {/* 4 Answer Choice Options Grid */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4">
         {currentQ.options.map((opt) => {
           const isSelected = selectedOptionId === opt.id;
           const isWrong = wrongOptions.includes(opt.id);
@@ -253,7 +253,7 @@ function QuizGameContent() {
               disabled={isWrong || isCorrect === true}
               onClick={() => handleSelectOption(opt.id)}
               className={cn(
-                "relative flex h-32 flex-col items-center justify-center gap-2 rounded-3xl border-2 bg-card p-4 text-center shadow-xs transition-all duration-150 active:scale-95",
+                "relative flex h-24 sm:h-32 flex-col items-center justify-center gap-1.5 rounded-2xl sm:rounded-3xl border-2 bg-card p-2 sm:p-4 text-center shadow-xs transition-all duration-150 active:scale-95",
                 !isWrong && !isRight && "border-border hover:border-primary/50 hover:bg-accent/50 hover:shadow-md",
                 isRight && "border-emerald-500 bg-emerald-500/10 ring-4 ring-emerald-500/30 text-emerald-700 dark:text-emerald-300 scale-105",
                 isWrong && "border-rose-400 bg-rose-500/10 opacity-50 cursor-not-allowed",
@@ -261,11 +261,11 @@ function QuizGameContent() {
               )}
             >
               {opt.emoji && (
-                <span className="text-4xl sm:text-5xl" aria-hidden>
+                <span className="text-3xl sm:text-5xl" aria-hidden>
                   {opt.emoji}
                 </span>
               )}
-              <span className="font-heading text-lg font-extrabold text-foreground sm:text-xl">
+              <span className="font-heading text-base font-extrabold text-foreground sm:text-xl">
                 {opt.label}
               </span>
             </button>

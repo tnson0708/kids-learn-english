@@ -70,43 +70,43 @@ export default function QuizSelectionPage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
-      <div className="mb-8 text-center">
-        <h1 className="font-heading text-3xl font-extrabold text-foreground sm:text-4xl">
+      <div className="mb-6 text-center sm:mb-8">
+        <h1 className="font-heading text-2xl font-black text-foreground sm:text-4xl">
           {t("quiz_title")}
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground sm:text-base">{t("quiz_subtitle")}</p>
+        <p className="mt-1 text-xs text-muted-foreground sm:mt-2 sm:text-base">{t("quiz_subtitle")}</p>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6">
         {modes.map((mode) => {
           const Icon = mode.icon;
           return (
             <Link key={mode.id} href={`/quiz/play?mode=${mode.id}`} className="group block">
               <Card
-                className={`flex h-full flex-col justify-between rounded-3xl border-none bg-gradient-to-br ${mode.gradient} p-7 shadow-md transition-all duration-200 group-hover:-translate-y-1.5 group-hover:shadow-xl group-active:scale-95 sm:p-8`}
+                className={`flex h-full flex-col justify-between rounded-2xl border-none bg-gradient-to-br ${mode.gradient} p-4 shadow-md transition-all duration-200 group-hover:-translate-y-1.5 group-hover:shadow-xl group-active:scale-95 sm:rounded-3xl sm:p-7`}
               >
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="text-5xl sm:text-6xl transition-transform group-hover:scale-110" aria-hidden>
+                    <span className="text-4xl sm:text-6xl transition-transform group-hover:scale-110" aria-hidden>
                       {mode.emoji}
                     </span>
-                    <span className="rounded-full bg-white/80 p-3 text-foreground/80 shadow-xs backdrop-blur-xs">
-                      <Icon className="size-6 text-primary" />
+                    <span className="rounded-full bg-white/80 p-2 sm:p-3 text-foreground/80 shadow-xs backdrop-blur-xs">
+                      <Icon className="size-5 sm:size-6 text-primary" />
                     </span>
                   </div>
 
-                  <h2 className="mt-6 font-heading text-2xl font-black text-foreground group-hover:text-primary transition-colors sm:text-3xl">
+                  <h2 className="mt-3 font-heading text-xl font-black text-foreground group-hover:text-primary transition-colors sm:mt-6 sm:text-3xl">
                     {t(mode.titleKey)}
                   </h2>
-                  <p className="mt-2.5 text-xs font-bold text-foreground/80 leading-relaxed sm:text-sm">
+                  <p className="mt-1 text-xs font-bold text-foreground/80 leading-relaxed sm:mt-2.5 sm:text-sm">
                     {t(mode.descKey)}
                   </p>
                 </div>
 
-                <div className="mt-7 flex items-center justify-between border-t border-black/10 pt-5">
-                  <span className="text-sm font-black text-primary sm:text-base">{t("quiz_start")}</span>
-                  <span className="rounded-full bg-primary p-2.5 text-primary-foreground shadow-xs transition-transform group-hover:translate-x-1">
-                    <ArrowRight className="size-5" />
+                <div className="mt-4 flex items-center justify-between border-t border-black/10 pt-3 sm:mt-7 sm:pt-5">
+                  <span className="text-xs font-black text-primary sm:text-base">{t("quiz_start")}</span>
+                  <span className="rounded-full bg-primary p-2 sm:p-2.5 text-primary-foreground shadow-xs transition-transform group-hover:translate-x-1">
+                    <ArrowRight className="size-4 sm:size-5" />
                   </span>
                 </div>
               </Card>

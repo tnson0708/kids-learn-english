@@ -52,23 +52,23 @@ export function VocabItemCard({ item }: { item: VocabItem }) {
         if (e.key === "Enter" || e.key === " ") handleTap();
       }}
       className={cn(
-        "flex cursor-pointer flex-col items-center justify-center gap-2 border-none bg-card py-6 text-center shadow-sm transition-all duration-150 hover:-translate-y-1 hover:shadow-md active:scale-95",
+        "relative flex cursor-pointer flex-col items-center justify-center gap-1.5 border-none bg-card py-4 px-2 sm:py-6 sm:px-3 text-center shadow-sm transition-all duration-150 hover:-translate-y-1 hover:shadow-md active:scale-95 rounded-2xl sm:rounded-3xl",
         active && "ring-4 ring-primary/50"
       )}
     >
       {isNumber ? (
         <NumberBadge number={numberVal} />
       ) : CustomSvg ? (
-        <CustomSvg className="size-16" />
+        <CustomSvg className="size-12 sm:size-16" />
       ) : (
-        <span className="text-6xl" aria-hidden>
+        <span className="text-4xl sm:text-6xl" aria-hidden>
           {item.emoji}
         </span>
       )}
       <div className="flex flex-col items-center gap-0.5">
-        <span className="font-heading text-lg font-extrabold text-foreground">{item.word.en}</span>
+        <span className="font-heading text-base sm:text-lg font-extrabold text-foreground">{item.word.en}</span>
         {item.word.ipa && (
-          <span className="text-xs text-muted-foreground/80 font-mono">{item.word.ipa}</span>
+          <span className="text-[10px] sm:text-xs text-muted-foreground/80 font-mono">{item.word.ipa}</span>
         )}
       </div>
       {language === "vi" && (
@@ -78,11 +78,11 @@ export function VocabItemCard({ item }: { item: VocabItem }) {
             if (e.key === "Enter" || e.key === " ") handleTapVi(e);
           }}
           className={cn(
-            "mt-1 flex items-center gap-1.5 rounded-full bg-muted/60 px-3.5 py-1.5 text-xs font-bold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:scale-95",
+            "mt-0.5 flex items-center gap-1 rounded-full bg-muted/60 px-2.5 py-1 text-[11px] sm:text-xs font-bold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:scale-95",
             viActive && "bg-primary/20 text-primary"
           )}
         >
-          <Volume2 className="size-4" />
+          <Volume2 className="size-3.5" />
           {item.word.vi}
         </button>
       )}

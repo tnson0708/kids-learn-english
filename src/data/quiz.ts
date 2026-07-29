@@ -57,7 +57,7 @@ export function generateQuizRound(mode: QuizMode, questionCount = 10): QuizQuest
 
       return {
         id: `quiz-alpha-${idx}-${target.letter}`,
-        promptText: `Letter ${target.letter}`,
+        promptText: "Listen & Find",
         promptSpeak: `Find letter ${target.speakAs || target.letter.toLowerCase()}`,
         promptIpa: target.ipa,
         correctOptionId: target.letter,

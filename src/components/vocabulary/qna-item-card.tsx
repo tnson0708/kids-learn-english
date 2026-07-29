@@ -59,27 +59,27 @@ export function QnaItemCard({ topic, item }: { topic: VocabTopic; item: VocabIte
         if (e.key === "Enter" || e.key === " ") handleTap();
       }}
       className={cn(
-        "flex cursor-pointer flex-col items-center justify-center gap-2 border-none bg-card py-6 text-center shadow-sm transition-all duration-150 hover:-translate-y-1 hover:shadow-md active:scale-95",
+        "flex cursor-pointer flex-col items-center justify-center gap-1.5 border-none bg-card py-4 px-2 sm:py-6 sm:px-3 text-center shadow-sm transition-all duration-150 hover:-translate-y-1 hover:shadow-md active:scale-95 rounded-2xl sm:rounded-3xl",
         asking && "ring-4 ring-primary/50"
       )}
     >
       {isNumber ? (
         <NumberBadge number={numberVal} />
       ) : CustomSvg ? (
-        <CustomSvg className="size-16" />
+        <CustomSvg className="size-12 sm:size-16" />
       ) : (
-        <span className="text-6xl" aria-hidden>
+        <span className="text-4xl sm:text-6xl" aria-hidden>
           {item.emoji}
         </span>
       )}
 
       {current ? (
-        <div className="flex min-h-12 flex-col items-center gap-0.5 px-2">
-          <span className="inline-flex items-center gap-1 text-xs font-bold text-primary">
-            <MessageCircleQuestion className="size-3.5" />
+        <div className="flex min-h-10 flex-col items-center gap-0.5 px-1">
+          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-primary">
+            <MessageCircleQuestion className="size-3" />
             {asking && t("qna_listening")}
           </span>
-          <span className="text-sm font-bold text-foreground text-center">{current.en}</span>
+          <span className="text-xs sm:text-sm font-extrabold text-foreground text-center">{current.en}</span>
           {language === "vi" && (
             <button
               onClick={(e) => handleTapVi(e, current.vi)}
@@ -87,7 +87,7 @@ export function QnaItemCard({ topic, item }: { topic: VocabTopic; item: VocabIte
                 if (e.key === "Enter" || e.key === " ") handleTapVi(e, current.vi);
               }}
               className={cn(
-                "mt-0.5 flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+                "mt-0.5 flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
                 viActive && "bg-primary/20 text-primary"
               )}
             >
@@ -98,7 +98,7 @@ export function QnaItemCard({ topic, item }: { topic: VocabTopic; item: VocabIte
         </div>
       ) : (
         <div className="flex flex-col items-center">
-          <span className="text-xs font-semibold text-muted-foreground">{item.word.en}</span>
+          <span className="text-xs sm:text-sm font-extrabold text-muted-foreground">{item.word.en}</span>
           {item.word.ipa && (
             <span className="text-[10px] text-muted-foreground/70 font-mono">{item.word.ipa}</span>
           )}

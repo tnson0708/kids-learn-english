@@ -50,38 +50,38 @@ export default function Home() {
 
   return (
     <div className="flex-1 bg-gradient-to-b from-amber-50 via-background to-background">
-      <section className="mx-auto max-w-5xl px-4 pt-10 pb-6 text-center sm:pt-16">
-        <Badge className="mb-4 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-bold text-primary">
+      <section className="mx-auto max-w-5xl px-4 pt-6 pb-4 text-center sm:pt-14 sm:pb-6">
+        <Badge className="mb-3 rounded-full bg-primary/10 px-3.5 py-1 text-xs font-extrabold text-primary sm:mb-4 sm:px-4 sm:py-1.5 sm:text-sm">
           {t("hero_badge")}
         </Badge>
-        <h1 className="font-heading text-3xl font-extrabold tracking-tight text-foreground sm:text-5xl">
+        <h1 className="font-heading text-2xl font-black tracking-tight text-foreground sm:text-4xl md:text-5xl">
           {t("hero_title")}
         </h1>
-        <p className="mx-auto mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg">
+        <p className="mx-auto mt-2 max-w-2xl text-xs font-semibold text-muted-foreground sm:mt-4 sm:text-base md:text-lg">
           {t("hero_subtitle")}
         </p>
       </section>
 
-      <section className="mx-auto grid max-w-5xl grid-cols-1 gap-5 px-4 pb-16 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="mx-auto grid max-w-5xl grid-cols-1 gap-4 px-4 pb-12 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5">
         {modules.map((mod) => (
           <Link key={mod.href} href={mod.href} className="group block">
             <Card
-              className={`h-full border-none bg-gradient-to-br ${mod.gradient} shadow-md transition-transform duration-150 group-hover:-translate-y-1 group-hover:shadow-lg group-active:translate-y-0`}
+              className={`h-full border-none bg-gradient-to-br ${mod.gradient} shadow-md transition-all duration-150 group-hover:-translate-y-1 group-hover:shadow-lg group-active:scale-95 p-4 sm:p-5`}
             >
-              <CardHeader>
-                <div className="mb-2 text-5xl" aria-hidden>
+              <CardHeader className="p-0 mb-3">
+                <div className="mb-1 text-4xl sm:text-5xl transition-transform group-hover:scale-110" aria-hidden>
                   {mod.emoji}
                 </div>
-                <Badge className="w-fit rounded-full bg-white/70 text-xs font-bold text-foreground/80">
+                <Badge className="w-fit rounded-full bg-white/80 text-[10px] sm:text-xs font-bold text-foreground/80">
                   {t(mod.badgeKey)}
                 </Badge>
-                <CardTitle className="font-heading text-2xl font-extrabold text-foreground">
+                <CardTitle className="font-heading text-xl sm:text-2xl font-black text-foreground mt-1">
                   {t(mod.titleKey)}
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-sm font-medium text-foreground/80">{t(mod.descKey)}</p>
-                <div className="mt-4 inline-flex items-center gap-1 text-sm font-bold text-foreground/90">
+              <CardContent className="p-0">
+                <p className="text-xs sm:text-sm font-semibold text-foreground/80 leading-relaxed">{t(mod.descKey)}</p>
+                <div className="mt-3 inline-flex items-center gap-1 text-xs sm:text-sm font-extrabold text-foreground/90">
                   <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
                 </div>
               </CardContent>
