@@ -116,9 +116,9 @@ export function LetterCard({ letter, index, caseMode = "lowercase" }: LetterCard
       </Card>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-xs rounded-3xl">
+        <DialogContent className="max-w-sm rounded-3xl p-5">
           <DialogHeader>
-            <DialogTitle className="font-heading text-xl">
+            <DialogTitle className="font-heading text-xl text-center">
               {t("alphabet_dialog_title")}: {displayLetter}
             </DialogTitle>
           </DialogHeader>
@@ -126,11 +126,10 @@ export function LetterCard({ letter, index, caseMode = "lowercase" }: LetterCard
           <StrokeOrderSvg
             letter={letter}
             caseMode={caseMode}
-            autoPlay={open}
-            className="mx-auto h-52 w-52 text-primary"
+            className="mx-auto"
           />
 
-          <div className="flex flex-col gap-2 pt-1">
+          <div className="flex flex-col gap-2 pt-2">
             <button
               type="button"
               onClick={() => speakEnglish(letter.speakAs || letter.letter.toLowerCase())}
@@ -152,7 +151,6 @@ export function LetterCard({ letter, index, caseMode = "lowercase" }: LetterCard
                 onClick={handleParentReward}
                 className="w-full inline-flex items-center justify-center gap-1.5 rounded-full border-2 border-amber-400 bg-amber-50 dark:bg-amber-950/60 dark:border-amber-500 px-4 py-2 text-xs font-extrabold text-amber-800 dark:text-amber-200 transition-all hover:bg-amber-100 active:scale-95 shadow-xs"
               >
-                <Trophy className="size-4 text-amber-500 fill-amber-400" />
                 <span>Ba Mẹ Thưởng +5</span>
                 <GoldCoin className="size-4" />
               </button>
