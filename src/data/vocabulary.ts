@@ -267,9 +267,9 @@ export const vocabularyTopics: VocabTopic[] = [
       { id: "arm", emoji: "💪", word: w("Arm", "Cánh tay", "/ɑrm/"), extraQuestions: [w("How many arms do you have?", "Con có bao nhiêu cánh tay?")] },
       { id: "finger", emoji: "👆", word: w("Finger", "Ngón tay", "/ˈfɪŋɡər/") },
       { id: "toe", emoji: "🦶", word: w("Toe", "Ngón chân", "/toʊ/") },
-      { id: "head", emoji: "🗣️", word: w("Head", "Đầu", "/hɛd/") },
-      { id: "hair", emoji: "💇", word: w("Hair", "Tóc", "/hɛr/") },
-      { id: "shoulder", emoji: "👔", word: w("Shoulder", "Vai", "/ˈʃoʊldər/") },
+      { id: "head", emoji: "🧒", word: w("Head", "Đầu", "/hɛd/") },
+      { id: "hair", emoji: "🦱", word: w("Hair", "Tóc", "/hɛr/") },
+      { id: "shoulder", emoji: "👕", word: w("Shoulder", "Vai", "/ˈʃoʊldər/") },
       { id: "knee", emoji: "🦵", word: w("Knee", "Đầu gối", "/niː/") },
     ],
     questionTemplates: (item) => [

@@ -8,6 +8,7 @@ export const translations = {
     nav_vocabulary: "Từ vựng",
     nav_qna: "Hỏi & Đáp",
     nav_quiz: "Trò chơi Đố vui",
+    nav_gifts: "Đổi Quà 🎁",
 
     // Home page
     app_name: "Bé Học Tiếng Anh",
@@ -31,6 +32,10 @@ export const translations = {
     mod_quiz_badge: "Thử thách 🎯",
     mod_quiz_desc:
       "Luyện nghe, chọn hình đúng và thu thập ngôi sao khen thưởng!",
+    mod_gifts_title: "Cửa hàng quà tặng",
+    mod_gifts_badge: "Đổi đồ chơi 🎁",
+    mod_gifts_desc:
+      "Tích lũy tiền đồng từ việc học bài để đổi lấy những món đồ chơi yêu thích!",
 
     // Quiz page
     quiz_title: "Trò chơi Đố vui (Dành cho bé 5 tuổi)",
@@ -94,6 +99,17 @@ export const translations = {
     lang_en: "EN",
     lang_vi: "VI",
 
+    // Gift shop page
+    gifts_title: "Cửa hàng Đồ chơi Quà tặng 🎁",
+    gifts_subtitle: "Bé học bài tích lũy tiền đồng để đổi những món đồ chơi yêu thích nhé!",
+    gifts_my_balance: "Số tiền bé tích lũy được",
+    gifts_dong: "đồng",
+    gifts_redeem_btn: "Đổi quà ngay 🎁",
+    gifts_need_more: "Còn thiếu",
+    gifts_claimed: "Đã đổi quà 🏆",
+    gifts_congrats_title: "Hoan hô! Bé đã đổi quà thành công! 🎉",
+    gifts_congrats_desc: "Món quà tuyệt vời này đã thuộc về bé. Hãy tiếp tục chăm học nhé!",
+
     // Topics
     topic_colors: "Màu sắc",
     topic_numbers: "Con số",
@@ -119,6 +135,7 @@ export const translations = {
     nav_vocabulary: "Vocabulary",
     nav_qna: "Q & A",
     nav_quiz: "Quiz Game",
+    nav_gifts: "Gifts 🎁",
 
     // Home page
     app_name: "Kids Learn English",
@@ -142,6 +159,10 @@ export const translations = {
     mod_quiz_badge: "Challenge 🎯",
     mod_quiz_desc:
       "Listen, pick the right answer, and earn reward stars!",
+    mod_gifts_title: "Gift Shop",
+    mod_gifts_badge: "Redeem Toys 🎁",
+    mod_gifts_desc:
+      "Earn coins by studying English lessons to unlock and redeem your favorite toys!",
 
     // Quiz page
     quiz_title: "Fun Quiz Game (Age 5+)",
@@ -204,6 +225,17 @@ export const translations = {
     voice_male: "Male",
     lang_en: "EN",
     lang_vi: "VI",
+
+    // Gift shop page
+    gifts_title: "Toy Gift Shop 🎁",
+    gifts_subtitle: "Study English lessons to earn coins and redeem your favorite toys!",
+    gifts_my_balance: "My Coin Balance",
+    gifts_dong: "coins",
+    gifts_redeem_btn: "Redeem Gift 🎁",
+    gifts_need_more: "Need",
+    gifts_claimed: "Claimed 🏆",
+    gifts_congrats_title: "Hooray! Gift Redeemed Successfully! 🎉",
+    gifts_congrats_desc: "You earned this awesome toy gift! Keep up the great learning!",
 
     // Topics
     topic_colors: "Colors",

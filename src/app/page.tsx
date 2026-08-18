@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, BookOpen, Gamepad2, HelpCircle, ImageIcon } from "lucide-react";
+import { ArrowRight, BookOpen, Gamepad2, Gift, HelpCircle, ImageIcon } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -46,6 +46,15 @@ export default function Home() {
       gradient: "from-amber-200 via-orange-100 to-rose-200",
       emoji: "🎯",
     },
+    {
+      href: "/gifts",
+      icon: Gift,
+      titleKey: "mod_gifts_title" as const,
+      badgeKey: "mod_gifts_badge" as const,
+      descKey: "mod_gifts_desc" as const,
+      gradient: "from-purple-200 via-pink-100 to-rose-200",
+      emoji: "🎁",
+    },
   ];
 
   return (
@@ -62,7 +71,7 @@ export default function Home() {
         </p>
       </section>
 
-      <section className="mx-auto grid max-w-5xl grid-cols-1 gap-4 px-4 pb-12 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5">
+      <section className="mx-auto grid max-w-5xl grid-cols-1 gap-4 px-4 pb-12 sm:grid-cols-2 lg:grid-cols-3 sm:gap-5">
         {modules.map((mod) => (
           <Link key={mod.href} href={mod.href} className="group block">
             <Card

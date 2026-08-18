@@ -171,7 +171,7 @@ export function speakEnglish(text: string, overrideGender?: VoiceGender, rate = 
         };
         utter.onerror = (e) => {
           activeUtterances.delete(utter);
-          if (e.error === "canceled" || e.error === "interrupted") return;
+          if (e.error === "canceled" || e.error === "interrupted" || e.error === "not-allowed") return;
           console.error("TTS utterance error event:", e.error);
         };
 
@@ -226,7 +226,7 @@ export function speakVietnamese(text: string, rate = 0.9): void {
         };
         utter.onerror = (e) => {
           activeUtterances.delete(utter);
-          if (e.error === "canceled" || e.error === "interrupted") return;
+          if (e.error === "canceled" || e.error === "interrupted" || e.error === "not-allowed") return;
           console.error("TTS utterance error event:", e.error);
         };
 

@@ -9,6 +9,8 @@ import { speakEnglish } from "@/lib/speech";
 import { playCorrectSound, playWrongSound, playVictorySound } from "@/lib/sound-effects";
 import { ConfettiEffect } from "@/components/quiz/confetti-effect";
 import { useLanguage } from "@/lib/language-context";
+import { useReward } from "@/lib/reward-context";
+import { GoldCoin } from "@/components/gold-coin";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
@@ -16,34 +18,38 @@ function QuizGameContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { t } = useLanguage();
+  const { addQuizCoins, dailyQuizCoins, maxDailyQuizCoins } = useReward();
 
   const mode = (searchParams.get("mode") as QuizMode) || "listen";
 
-  const [questions, setQuestions] = useState<QuizQuestionItem[]>(() =>
-    generateQuizRound(mode, 10)
-  );
+  const [questions, setQuestions] = useState<QuizQuestionItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [stars, setStars] = useState(0);
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
-  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [wrongOptions, setWrongOptions] = useState<string[]>([]);
+  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+  const [stars, setStars] = useState(0);
   const [isFirstAttempt, setIsFirstAttempt] = useState(true);
+  const [showConfetti, setShowConfetti] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [shakingOptionId, setShakingOptionId] = useState<string | null>(null);
-  const [showConfetti, setShowConfetti] = useState(false);
 
-  const startNewRound = useCallback(() => {
-    const round = generateQuizRound(mode, 10);
-    setQuestions(round);
+  const initRound = useCallback(() => {
+    const roundQ = generateQuizRound(mode, 10);
+    setQuestions(roundQ);
     setCurrentIndex(0);
-    setStars(0);
     setSelectedOptionId(null);
-    setIsCorrect(null);
     setWrongOptions([]);
+    setIsCorrect(null);
+    setStars(0);
     setIsFirstAttempt(true);
-    setCompleted(false);
     setShowConfetti(false);
+    setCompleted(false);
+    setShakingOptionId(null);
   }, [mode]);
+
+  useEffect(() => {
+    initRound();
+  }, [initRound]);
 
   const currentQ = questions[currentIndex];
 
@@ -77,6 +83,7 @@ function QuizGameContent() {
 
       if (isFirstAttempt) {
         setStars((s) => s + 1);
+        addQuizCoins(15);
       }
       if (opt.speakText) {
         speakEnglish(opt.speakText);
@@ -109,29 +116,37 @@ function QuizGameContent() {
     }
   };
 
+  const startNewRound = () => {
+    initRound();
+  };
+
   if (!currentQ && !completed) {
-    return (
-      <div className="flex flex-1 items-center justify-center py-20 text-muted-foreground">
-        Loading Quiz...
-      </div>
-    );
+    return null;
   }
 
   if (completed) {
     return (
       <div className="mx-auto flex w-full max-w-lg flex-1 flex-col items-center justify-center px-4 py-12 text-center">
-        <ConfettiEffect active count={60} />
-        <div className="rounded-full bg-amber-500/10 p-6 text-amber-500 mb-4 animate-bounce">
-          <Trophy className="size-16" />
+        <ConfettiEffect active />
+
+        <div className="mb-4 flex size-20 items-center justify-center rounded-full bg-amber-500/20 text-5xl">
+          🏆
         </div>
         <h1 className="font-heading text-3xl font-extrabold text-foreground sm:text-4xl">
           {t("quiz_victory_title")}
         </h1>
         <p className="mt-2 text-muted-foreground">{t("quiz_stars_earned")}:</p>
 
-        <div className="my-6 inline-flex items-center gap-2 rounded-full bg-amber-500/15 px-6 py-3 text-2xl font-extrabold text-amber-600 dark:text-amber-400">
+        <div className="my-4 inline-flex items-center gap-2 rounded-full bg-amber-500/15 px-6 py-3 text-2xl font-extrabold text-amber-600 dark:text-amber-400">
           <Star className="size-8 fill-amber-400 text-amber-500" />
           <span>{stars} / {questions.length} Stars</span>
+        </div>
+
+        <div className="mb-6 inline-flex items-center gap-1.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 p-3.5 border border-amber-200 dark:border-amber-800 text-xs font-semibold text-amber-800 dark:text-amber-200">
+          <GoldCoin className="size-4 shrink-0" />
+          <span>
+            {t("gifts_my_balance")}: <strong>{dailyQuizCoins}/{maxDailyQuizCoins} {t("gifts_dong")} Quiz hôm nay</strong>
+          </span>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
@@ -170,10 +185,17 @@ function QuizGameContent() {
           <span>{t("quiz_back_to_modes")}</span>
         </Link>
 
-        {/* Stars counter */}
-        <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-3 py-1 text-sm font-extrabold text-amber-600 dark:text-amber-400">
-          <Star className="size-4 fill-amber-400 text-amber-500" />
-          <span>{stars}</span>
+        {/* Rewards & Stars counter */}
+        <div className="flex items-center gap-2">
+          <div className="inline-flex items-center gap-1 rounded-full bg-amber-50 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700 px-3 py-1 text-xs font-black text-amber-700 dark:text-amber-300 shadow-2xs">
+            <GoldCoin className="size-3.5" />
+            <span>{dailyQuizCoins}/{maxDailyQuizCoins}</span>
+          </div>
+
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-3 py-1 text-sm font-extrabold text-amber-600 dark:text-amber-400">
+            <Star className="size-4 fill-amber-400 text-amber-500" />
+            <span>{stars}</span>
+          </div>
         </div>
       </div>
 
