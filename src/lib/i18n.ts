@@ -69,12 +69,16 @@ export const translations = {
     case_lowercase: "Chữ thường (a)",
     case_both: "Cả hai (Aa)",
 
-    // Vocabulary page
     vocabulary_title: "Từ vựng theo chủ đề",
     vocabulary_subtitle: "Chọn một chủ đề để bắt đầu học từ vựng.",
     vocabulary_back: "Quay lại chủ đề",
     vocabulary_tap_hint: "Chạm vào hình để nghe từ",
     vocabulary_items_count: "từ",
+    vocab_tab_all: "Tất cả",
+    vocab_tab_words: "Từ vựng",
+    vocab_tab_sentences: "Mẫu câu",
+    vocab_sentences_title: "Mẫu câu đơn giản",
+    vocab_sentences_hint: "Chạm vào câu để nghe đọc tiếng Anh & tiếng Việt",
 
     // Q&A page
     qna_title: "Hỏi & Đáp",
@@ -176,12 +180,16 @@ export const translations = {
     case_lowercase: "Lowercase (a)",
     case_both: "Both (Aa)",
 
-    // Vocabulary page
     vocabulary_title: "Vocabulary by Topic",
     vocabulary_subtitle: "Pick a topic to start learning new words.",
     vocabulary_back: "Back to topics",
     vocabulary_tap_hint: "Tap a picture to hear the word",
     vocabulary_items_count: "words",
+    vocab_tab_all: "All",
+    vocab_tab_words: "Words",
+    vocab_tab_sentences: "Sentences",
+    vocab_sentences_title: "Simple Sentences",
+    vocab_sentences_hint: "Tap a sentence to hear it read aloud in English & Vietnamese",
 
     // Q&A page
     qna_title: "Q & A",

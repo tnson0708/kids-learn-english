@@ -64,9 +64,12 @@ export function Nav() {
         </div>
       </header>
 
-      {/* Mobile & iPad Fixed Bottom Navigation Bar (No horizontal scroll, 100% full width touch targets) */}
-      <nav aria-label="Mobile Navigation" className="fixed bottom-0 left-0 right-0 z-50 lg:hidden border-t bg-background/98 backdrop-blur shadow-2xl pb-safe">
-        <div className="mx-auto grid h-16 sm:h-20 max-w-md sm:max-w-xl grid-cols-5 items-center px-1">
+      {/* Mobile & iPad Floating Bottom Navigation Bar (Raised above iPhone home indicator) */}
+      <nav
+        aria-label="Mobile Navigation"
+        className="fixed bottom-3 left-3 right-3 sm:bottom-4 sm:left-6 sm:right-6 z-50 lg:hidden rounded-3xl border bg-background/95 backdrop-blur-md shadow-2xl mb-[env(safe-area-inset-bottom,0px)]"
+      >
+        <div className="mx-auto grid h-16 sm:h-18 max-w-md sm:max-w-xl grid-cols-5 items-center px-1">
           {links.map((link) => {
             const Icon = link.icon;
             const active = link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);

@@ -21,6 +21,7 @@ export interface VocabTopic {
   gradient: string;
   items: VocabItem[];
   questionTemplates: (item: VocabItem) => Bilingual[];
+  sentences?: Bilingual[];
 }
 
 const w = (en: string, vi: string, ipa?: string): Bilingual => ({ en, vi, ipa });
@@ -118,6 +119,13 @@ export const vocabularyTopics: VocabTopic[] = [
       w("What color is this?", "Đây là màu gì?"),
       w(`Is this ${item.word.en.toLowerCase()}?`, `Đây có phải là ${item.word.vi.toLowerCase()} không?`),
     ],
+    sentences: [
+      w("The sun is yellow.", "Mặt trời có màu vàng."),
+      w("The sky is blue.", "Bầu trời có màu xanh dương."),
+      w("I see a red apple.", "Con thấy một quả táo màu đỏ."),
+      w("Grass is green.", "Cỏ có màu xanh lá."),
+      w("I like purple flowers.", "Con thích những bông hoa màu tím."),
+    ],
   },
   {
     id: "numbers",
@@ -128,6 +136,13 @@ export const vocabularyTopics: VocabTopic[] = [
     questionTemplates: (item) => [
       w(`Can you count to ${item.word.en.toLowerCase()}?`, `Con đếm đến ${item.word.vi.toLowerCase()} được không?`),
       w(`Show me ${item.word.en.toLowerCase()} fingers!`, `Con giơ ${item.word.vi.toLowerCase()} ngón tay lên nhé!`),
+    ],
+    sentences: [
+      w("I have one nose.", "Con có một cái mũi."),
+      w("I have two hands.", "Con có hai bàn tay."),
+      w("I see three birds.", "Con thấy ba chú chim."),
+      w("Can you count to five?", "Con đếm đến năm được không?"),
+      w("We count to ten together!", "Chúng ta cùng đếm đến mười nhé!"),
     ],
   },
   {
@@ -170,6 +185,13 @@ export const vocabularyTopics: VocabTopic[] = [
     questionTemplates: (item) => [
       w("What fruit is this?", "Đây là quả gì?"),
       w(`Do you like ${item.word.en.toLowerCase()}?`, `Con có thích ${item.word.vi.toLowerCase()} không?`),
+    ],
+    sentences: [
+      w("I eat a sweet apple.", "Con ăn một quả táo ngọt."),
+      w("The banana is yellow.", "Quả chuối có màu vàng."),
+      w("I like fresh strawberries.", "Con thích dâu tây tươi."),
+      w("An orange is juicy.", "Quả cam nhiều nước."),
+      w("We share a watermelon.", "Cả nhà cùng ăn dưa hấu."),
     ],
   },
   {
@@ -219,6 +241,13 @@ export const vocabularyTopics: VocabTopic[] = [
       w("What animal is this?", "Đây là con gì?"),
       w(`What sound does a ${item.word.en.toLowerCase()} make?`, `Con ${item.word.vi.toLowerCase()} kêu như thế nào?`),
     ],
+    sentences: [
+      w("The dog says woof!", "Con chó kêu gâu gâu!"),
+      w("The cat drinks milk.", "Con mèo uống sữa."),
+      w("The elephant is very big.", "Con voi rất to lớn."),
+      w("A bird can fly in the sky.", "Con chim có thể bay trên trời."),
+      w("The rabbit jumps fast.", "Con thỏ nhảy rất nhanh."),
+    ],
   },
   {
     id: "body-parts",
@@ -247,6 +276,13 @@ export const vocabularyTopics: VocabTopic[] = [
       w("What is this?", "Đây là bộ phận gì?"),
       w(`Can you touch your ${item.word.en.toLowerCase()}?`, `Con chạm vào ${item.word.vi.toLowerCase()} của mình được không?`),
     ],
+    sentences: [
+      w("I wash my hands.", "Con rửa sạch bàn tay."),
+      w("I see with my eyes.", "Con nhìn bằng mắt."),
+      w("I listen with my ears.", "Con nghe bằng tai."),
+      w("I brush my teeth every day.", "Con đánh răng mỗi ngày."),
+      w("Touch your nose!", "Chạm vào mũi của con nào!"),
+    ],
   },
   {
     id: "shapes",
@@ -269,6 +305,13 @@ export const vocabularyTopics: VocabTopic[] = [
     questionTemplates: (item) => [
       w("What shape is this?", "Đây là hình gì?"),
       w(`Can you find something shaped like a ${item.word.en.toLowerCase()}?`, `Con tìm đồ vật có ${item.word.vi.toLowerCase()} được không?`),
+    ],
+    sentences: [
+      w("A ball is a circle.", "Quả bóng có hình tròn."),
+      w("A window is a square.", "Cửa sổ có hình vuông."),
+      w("Look at the shining star!", "Hãy nhìn ngôi sao lấp lánh kìa!"),
+      w("A slice of pizza is a triangle.", "Miếng bánh pizza có hình tam giác."),
+      w("I can draw a heart!", "Con có thể vẽ hình trái tim!"),
     ],
   },
   {
@@ -293,6 +336,13 @@ export const vocabularyTopics: VocabTopic[] = [
     questionTemplates: (item) => [
       w("How do you feel?", "Con cảm thấy thế nào?"),
       w(`Are you feeling ${item.word.en.toLowerCase()}?`, `Con có cảm thấy ${item.word.vi.toLowerCase()} không?`),
+    ],
+    sentences: [
+      w("I am happy today.", "Hôm nay con rất vui."),
+      w("Give me a big smile!", "Cười thật tươi với ba mẹ nhé!"),
+      w("I am sleepy, good night!", "Con buồn ngủ rồi, chúc ngủ ngon!"),
+      w("Take a deep breath when angry.", "Hít thở sâu khi tức giận nhé."),
+      w("I feel excited to play!", "Con thấy hào hứng để chơi!"),
     ],
   },
   {
@@ -319,6 +369,13 @@ export const vocabularyTopics: VocabTopic[] = [
       w("What is this?", "Đây là đồ dùng gì?"),
       w(`Do you have a ${item.word.en.toLowerCase()}?`, `Con có ${item.word.vi.toLowerCase()} không?`),
     ],
+    sentences: [
+      w("I write with my pencil.", "Con viết bằng bút chì."),
+      w("Open your book to read.", "Mở sách ra để đọc nhé."),
+      w("I put books in my backpack.", "Con bỏ sách vào balo."),
+      w("Draw a picture with crayons!", "Vẽ tranh bằng bút màu sáp nào!"),
+      w("Keep your desk clean.", "Giữ bàn học luôn sạch sẻ nhé."),
+    ],
   },
   {
     id: "family",
@@ -341,6 +398,13 @@ export const vocabularyTopics: VocabTopic[] = [
     questionTemplates: (item) => [
       w("Who is this?", "Đây là ai?"),
       w(`Do you love your ${item.word.en.toLowerCase()}?`, `Con có yêu ${item.word.vi.toLowerCase()} của mình không?`),
+    ],
+    sentences: [
+      w("I love my family.", "Con yêu gia đình của con."),
+      w("My dad gives me a big hug.", "Bố ôm con thật chặt."),
+      w("Mom reads a story to me.", "Mẹ đọc truyện cho con nghe."),
+      w("Grandma bakes delicious cakes.", "Bà nướng bánh rất ngon."),
+      w("I play with my brother and sister.", "Con chơi cùng anh chị em."),
     ],
   },
   {
@@ -376,6 +440,13 @@ export const vocabularyTopics: VocabTopic[] = [
       w("What vegetable is this?", "Đây là loại rau củ gì?"),
       w(`Do you like to eat ${item.word.en.toLowerCase()}?`, `Con có thích ăn ${item.word.vi.toLowerCase()} không?`),
     ],
+    sentences: [
+      w("Carrots are good for your eyes.", "Cà rốt rất tốt cho mắt."),
+      w("Broccoli looks like tiny trees.", "Bông cải xanh trông như những cái cây nhỏ."),
+      w("Eating vegetables makes me strong!", "Ăn rau củ giúp con khỏe mạnh!"),
+      w("Tomatoes are red and fresh.", "Cà chua màu đỏ và tươi ngon."),
+      w("I like sweet corn!", "Con thích ăn bắp nếp ngọt!"),
+    ],
   },
   {
     id: "kitchen-utensils",
@@ -402,6 +473,13 @@ export const vocabularyTopics: VocabTopic[] = [
     questionTemplates: (item) => [
       w("What kitchen tool is this?", "Đây là đồ dùng nhà bếp gì?"),
       w(`Do you use a ${item.word.en.toLowerCase()}?`, `Con có dùng ${item.word.vi.toLowerCase()} không?`),
+    ],
+    sentences: [
+      w("I eat soup with a spoon.", "Con ăn súp bằng thìa."),
+      w("Drink water from a cup.", "Uống nước bằng cốc nhé."),
+      w("Food is stored in the fridge.", "Thức ăn được cất trong tủ lạnh."),
+      w("Mom cooks with a big pot.", "Mẹ nấu ăn bằng cái nồi to."),
+      w("We clean the plates together.", "Cả nhà cùng rửa sạch đĩa."),
     ],
   },
   {
@@ -430,6 +508,13 @@ export const vocabularyTopics: VocabTopic[] = [
       w("What is this in the living room?", "Đây là món đồ gì trong phòng khách?"),
       w(`Can you see a ${item.word.en.toLowerCase()}?`, `Con có thấy ${item.word.vi.toLowerCase()} không?`),
     ],
+    sentences: [
+      w("We sit together on the sofa.", "Cả nhà cùng ngồi trên ghế sofa."),
+      w("Turn on the lamp to read.", "Bật đèn bàn lên để đọc sách."),
+      w("We watch TV in the evening.", "Cả nhà xem tivi vào buổi tối."),
+      w("Look at the clock on the wall!", "Hãy nhìn đồng hồ trên tường kìa!"),
+      w("The houseplant is green.", "Cây cảnh có màu xanh tươi."),
+    ],
   },
   {
     id: "bedroom",
@@ -453,6 +538,13 @@ export const vocabularyTopics: VocabTopic[] = [
     questionTemplates: (item) => [
       w("What is this in the bedroom?", "Đây là đồ dùng gì trong phòng ngủ?"),
       w(`Do you have a ${item.word.en.toLowerCase()} in your room?`, `Phòng con có ${item.word.vi.toLowerCase()} không?`),
+    ],
+    sentences: [
+      w("I sleep on a comfortable bed.", "Con ngủ trên chiếc giường êm ái."),
+      w("Put your head on the soft pillow.", "Gối đầu lên chiếc gối mềm mại."),
+      w("Cover yourself with a warm blanket.", "Đắp chiếc chăn ấm áp vào nhé."),
+      w("Put toys back in the toy box.", "Cất đồ chơi vào hộp sau khi chơi nhé."),
+      w("Set the alarm clock for morning.", "Đặt đồng hồ báo thức cho buổi sáng."),
     ],
   },
 ];
