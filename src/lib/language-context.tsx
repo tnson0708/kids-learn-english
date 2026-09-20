@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useSyncExternalStore } from "react";
+import { usePathname } from "next/navigation";
 import { translations, type Language, type TranslationKey } from "./i18n";
 
 interface LanguageContextType {
@@ -42,15 +43,20 @@ function setLanguage(lang: Language) {
 }
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const language = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const pathname = usePathname();
+  const storedLanguage = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+
+  // Multi-language support is ONLY enabled for English subject pages (/english/...)
+  const isEnglishSubject = pathname?.startsWith("/english") ?? false;
+  const activeLanguage: Language = isEnglishSubject ? storedLanguage : "vi";
 
   const t = (key: TranslationKey): string => {
-    const dict = translations[language] || translations.vi;
+    const dict = translations[activeLanguage] || translations.vi;
     return dict[key] || translations.vi[key] || key;
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language: activeLanguage, setLanguage, t }}>
       {children}
     </LanguageContext.Provider>
   );

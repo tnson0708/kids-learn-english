@@ -45,6 +45,14 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  --color-english-accent: var(--english-accent);
+  --color-english-accent-soft: var(--english-accent-soft);
+  --color-vietnamese-accent: var(--vietnamese-accent);
+  --color-vietnamese-accent-soft: var(--vietnamese-accent-soft);
+  --color-art-accent: var(--art-accent);
+  --color-art-accent-soft: var(--art-accent-soft);
+  --color-soon: var(--soon);
+  --color-soon-soft: var(--soon-soft);
 }
 
 :root {
@@ -81,6 +89,18 @@
   --sidebar-accent-foreground: oklch(0.28 0.06 270);
   --sidebar-border: oklch(0.89 0.03 90);
   --sidebar-ring: oklch(0.72 0.19 45 / 50%);
+
+  /* Per-subject accent colors (English = blue, Vietnamese = coral), used by
+     the homepage subject grid and subject headers so each subject keeps a
+     distinct identity while sharing the rest of the design system. */
+  --english-accent: oklch(0.62 0.15 250);
+  --english-accent-soft: oklch(0.93 0.03 250);
+  --vietnamese-accent: oklch(0.64 0.19 30);
+  --vietnamese-accent-soft: oklch(0.94 0.045 30);
+  --art-accent: oklch(0.58 0.19 300);
+  --art-accent-soft: oklch(0.93 0.035 300);
+  --soon: oklch(0.65 0.02 90);
+  --soon-soft: oklch(0.93 0.015 90);
 }
 
 .dark {
@@ -115,6 +135,15 @@
   --sidebar-accent-foreground: oklch(0.96 0.01 90);
   --sidebar-border: oklch(1 0 0 / 12%);
   --sidebar-ring: oklch(0.75 0.18 45 / 50%);
+
+  --english-accent: oklch(0.7 0.14 250);
+  --english-accent-soft: oklch(0.32 0.045 250);
+  --vietnamese-accent: oklch(0.7 0.18 30);
+  --vietnamese-accent-soft: oklch(0.35 0.06 30);
+  --art-accent: oklch(0.72 0.16 300);
+  --art-accent-soft: oklch(0.33 0.05 300);
+  --soon: oklch(0.55 0.02 90);
+  --soon-soft: oklch(0.3 0.015 90);
 }
 
 @layer base {
@@ -137,4 +166,60 @@
 
 .animate-shake {
   animation: shake 0.4s ease-in-out;
+}
+
+.clay-card {
+  border-radius: 28px;
+  box-shadow: 0 10px 30px rgba(240, 180, 120, 0.12);
+  transition: all 0.28s ease-in-out;
+}
+.clay-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 36px rgba(240, 150, 100, 0.18);
+}
+
+@keyframes strokeTrace {
+  0% { stroke-dashoffset: 380; }
+  100% { stroke-dashoffset: 0; }
+}
+
+.animate-pen-stroke {
+  stroke-dasharray: 380;
+  animation: strokeTrace 3s ease-in-out infinite;
+}
+
+@keyframes pulseSoft {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.18); opacity: 0.8; }
+}
+
+.start-dot-pulse {
+  animation: pulseSoft 1.8s infinite ease-in-out;
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 6mm 8mm;
+  }
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .print\:block {
+    display: block !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+  .page-break {
+    page-break-before: always !important;
+    break-before: always !important;
+  }
 }

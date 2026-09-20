@@ -3,9 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, Gamepad2, Gift, HelpCircle, Home, ImageIcon, ShieldCheck } from "lucide-react";
+import { Gift, Home, ShieldCheck } from "lucide-react";
 import { LanguageToggle } from "@/components/language-toggle";
 import { VoiceToggle } from "@/components/voice-toggle";
+import { VoiceEnabledToggle } from "@/components/voice-enabled-toggle";
 import { ParentPinModal } from "@/components/parent-pin-modal";
 import { ParentControlModal } from "@/components/parent-control-modal";
 import { GoldCoin } from "@/components/gold-coin";
@@ -13,10 +14,17 @@ import { useLanguage } from "@/lib/language-context";
 import { useReward } from "@/lib/reward-context";
 import { cn } from "@/lib/utils";
 
+const TOP_NAV_LINKS = [
+  { href: "/", key: "nav_home" as const },
+  { href: "/#core-subjects", key: "nav_subjects" as const },
+  { href: "/english/quiz", key: "nav_quiz" as const },
+  { href: "/gifts", key: "nav_gifts" as const },
+] as const;
+
 export function Nav() {
   const pathname = usePathname();
   const { t } = useLanguage();
-  const { coins, isParentUnlocked } = useReward();
+  const { coins, rewardedItemIds } = useReward();
 
   const [showPinModal, setShowPinModal] = useState(false);
   const [showParentModal, setShowParentModal] = useState(false);
@@ -29,53 +37,59 @@ export function Nav() {
     setShowParentModal(true);
   };
 
-  const links = [
-    { href: "/", label: t("nav_home"), icon: Home },
-    { href: "/alphabet", label: t("nav_alphabet"), icon: BookOpen },
-    { href: "/vocabulary", label: t("nav_vocabulary"), icon: ImageIcon },
-    { href: "/qna", label: t("nav_qna"), icon: HelpCircle },
-    { href: "/quiz", label: t("nav_quiz"), icon: Gamepad2 },
-    { href: "/gifts", label: t("nav_gifts"), icon: Gift },
-  ];
-
   return (
     <>
       {/* Top Header */}
-      <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+      <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 print:hidden">
         <div className="mx-auto flex h-16 sm:h-20 max-w-6xl items-center justify-between gap-2 px-3 sm:px-6">
           <Link
             href="/"
-            className="flex items-center gap-2 font-heading text-lg sm:text-2xl font-black tracking-tight text-primary shrink-0"
+            className="flex flex-col shrink-0 font-heading text-lg sm:text-xl font-black tracking-tight text-primary"
           >
-            <span className="text-xl sm:text-3xl" aria-hidden>🐝</span>
-            <span className="hidden xs:inline sm:inline">{t("app_name")}</span>
+            <span className="flex items-center gap-1.5">
+              <span className="text-xl sm:text-2xl" aria-hidden>🦁</span>
+              <span className="hidden xs:inline sm:inline">{t("app_name")}</span>
+            </span>
+            <span className="hidden text-[10px] font-semibold text-muted-foreground sm:block">
+              {t("app_tagline")}
+            </span>
           </Link>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden xl:flex items-center gap-1.5">
-            {links.map((link) => {
-              const Icon = link.icon;
+          <nav className="hidden items-center gap-1 lg:flex">
+            {TOP_NAV_LINKS.map((link) => {
               const active = link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
               return (
                 <Link
                   key={link.href}
                   href={link.href}
                   className={cn(
-                    "inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-extrabold whitespace-nowrap transition-all active:scale-95 lg:px-4 lg:py-2.5 lg:text-sm",
+                    "rounded-full px-3 py-2 text-sm font-bold whitespace-nowrap transition-all active:scale-95",
                     active
                       ? "bg-primary text-primary-foreground shadow-xs"
                       : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                   )}
                 >
-                  <Icon className="size-4 shrink-0" />
-                  <span>{link.label}</span>
+                  {t(link.key)}
                 </Link>
               );
             })}
+            <button
+              type="button"
+              onClick={handleOpenParentControl}
+              className="rounded-full px-3 py-2 text-sm font-bold text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground active:scale-95"
+            >
+              {t("nav_parent_corner")}
+            </button>
           </nav>
 
-          {/* Top Header Right Controls (Coins, Parent Control, Voice, Language) */}
+          {/* Top Header Right Controls (Stars, Coins, Voice, Language) */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {/* Stars earned (rewarded items) */}
+            <span className="hidden items-center gap-1 rounded-full border-2 border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-black text-amber-700 dark:border-amber-600 dark:bg-amber-950/60 dark:text-amber-300 sm:flex">
+              <span aria-hidden>⭐</span> {rewardedItemIds.length}
+            </span>
+
             {/* Live Coins Badge */}
             <Link
               href="/gifts"
@@ -87,17 +101,17 @@ export function Nav() {
               </span>
             </Link>
 
-            {/* Parent Control Button */}
+            {/* Parent Control Button (mobile/tablet fallback — desktop uses the nav link above) */}
             <button
               type="button"
               onClick={handleOpenParentControl}
-              title="Quản lý của Ba Mẹ / Parent Control"
-              className="flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2.5 py-1.5 text-xs font-extrabold text-primary transition-all hover:bg-primary/20 active:scale-95"
+              title={t("nav_parent_corner")}
+              className="flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2.5 py-1.5 text-xs font-extrabold text-primary transition-all hover:bg-primary/20 active:scale-95 lg:hidden"
             >
               <ShieldCheck className="size-4" />
-              <span className="hidden md:inline">Ba Mẹ</span>
             </button>
 
+            <VoiceEnabledToggle />
             <VoiceToggle />
             <LanguageToggle />
           </div>
@@ -118,10 +132,13 @@ export function Nav() {
       {/* Mobile Floating Bottom Navigation Bar */}
       <nav
         aria-label="Mobile Navigation"
-        className="fixed bottom-2 left-2 right-2 sm:bottom-4 sm:left-6 sm:right-6 z-50 xl:hidden rounded-3xl border bg-background/95 backdrop-blur-md shadow-2xl mb-[env(safe-area-inset-bottom,0px)]"
+        className="fixed bottom-2 left-2 right-2 sm:bottom-4 sm:left-6 sm:right-6 z-50 lg:hidden rounded-3xl border bg-background/95 backdrop-blur-md shadow-2xl mb-[env(safe-area-inset-bottom,0px)] print:hidden"
       >
-        <div className="mx-auto grid h-16 sm:h-18 max-w-lg grid-cols-6 items-center px-1">
-          {links.map((link) => {
+        <div className="mx-auto grid h-16 sm:h-18 max-w-xs grid-cols-2 items-center px-1">
+          {[
+            { href: "/", label: t("nav_home"), icon: Home },
+            { href: "/gifts", label: t("nav_gifts"), icon: Gift },
+          ].map((link) => {
             const Icon = link.icon;
             const active = link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
             return (

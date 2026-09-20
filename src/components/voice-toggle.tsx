@@ -1,28 +1,17 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
-import {
-  getVoiceGender,
-  getVoiceGenderServerSnapshot,
-  setVoiceGender,
-  speakEnglish,
-  subscribeVoiceGender,
-  type VoiceGender,
-} from "@/lib/speech";
+import { useVoice } from "@/lib/voice-context";
 import { useLanguage } from "@/lib/language-context";
 import { cn } from "@/lib/utils";
+import type { VoiceGender } from "@/lib/speech";
 
 export function VoiceToggle() {
   const { t } = useLanguage();
-  const gender = useSyncExternalStore(
-    subscribeVoiceGender,
-    getVoiceGender,
-    getVoiceGenderServerSnapshot
-  );
+  const { gender, setGender, speak } = useVoice();
 
   const handleGenderChange = (newGender: VoiceGender) => {
-    setVoiceGender(newGender);
-    speakEnglish("Hello!", newGender);
+    setGender(newGender);
+    speak("Hello!", "en");
   };
 
   return (

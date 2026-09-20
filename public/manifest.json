@@ -1,7 +1,7 @@
 {
-  "name": "Kids Learn English — Bé Học Tiếng Anh",
-  "short_name": "Kids English",
-  "description": "A playful alphabet, vocabulary, and Q&A practice app for young children.",
+  "name": "Bé Tự Học — Vui Học Khôn Lớn",
+  "short_name": "Bé Tự Học",
+  "description": "A playful multi-subject learning app for young children: English, Vietnamese, and more.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#fffbeb",

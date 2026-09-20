@@ -17,14 +17,14 @@ const headingFont = Baloo_2({
 });
 
 export const metadata: Metadata = {
-  title: "Kids Learn English — Bé Học Tiếng Anh",
+  title: "Bé Tự Học — Vui Học Khôn Lớn",
   description:
-    "A playful alphabet, vocabulary, and Q&A practice app to help young children learn English.",
+    "A playful multi-subject learning app for young children: English, Vietnamese, and more.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Kids English",
+    title: "Bé Tự Học",
   },
   icons: {
     icon: [

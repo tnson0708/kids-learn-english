@@ -1,10 +1,16 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useLanguage } from "@/lib/language-context";
 import { cn } from "@/lib/utils";
 
 export function LanguageToggle() {
+  const pathname = usePathname();
   const { language, setLanguage } = useLanguage();
+
+  if (!pathname?.startsWith("/english")) {
+    return null;
+  }
 
   return (
     <div className="flex items-center rounded-full border bg-muted/80 p-1 text-xs shadow-2xs">

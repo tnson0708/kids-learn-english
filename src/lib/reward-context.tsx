@@ -13,6 +13,7 @@ interface RewardContextType {
   isParentUnlocked: boolean;
   dailyQuizCoins: number;
   maxDailyQuizCoins: number;
+  streakDays: number;
   addCoins: (amount: number, reason?: string) => void;
   rewardItem: (itemId: string, amount: number, reason?: string) => boolean;
   isItemRewarded: (itemId: string) => boolean;
@@ -37,6 +38,8 @@ const GIFT_PRICES_KEY = "kids_english_gift_prices_v1";
 const PIN_KEY = "kids_english_parent_pin_v1";
 const QUIZ_DATE_KEY = "kids_english_quiz_date_v1";
 const QUIZ_DAILY_COINS_KEY = "kids_english_quiz_daily_v1";
+const STREAK_DAYS_KEY = "kids_english_streak_days_v1";
+const STREAK_LAST_ACTIVE_KEY = "kids_english_streak_last_active_v1";
 
 export const MAX_DAILY_QUIZ_COINS = 20;
 
@@ -52,6 +55,7 @@ export function RewardProvider({ children }: { children: React.ReactNode }) {
   const [parentPin, setParentPin] = useState<string>("1234");
   const [isParentUnlocked, setIsParentUnlocked] = useState<boolean>(false);
   const [dailyQuizCoins, setDailyQuizCoins] = useState<number>(0);
+  const [streakDays, setStreakDays] = useState<number>(0);
   const [toast, setToast] = useState<{ amount: number; reason?: string; id: number } | null>(null);
 
   // Load state from localStorage on mount
@@ -88,6 +92,19 @@ export function RewardProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem(QUIZ_DATE_KEY, today);
         localStorage.setItem(QUIZ_DAILY_COINS_KEY, "0");
         setDailyQuizCoins(0);
+      }
+
+      // Daily learning streak: count consecutive calendar days the app was opened.
+      const lastActive = localStorage.getItem(STREAK_LAST_ACTIVE_KEY);
+      const storedStreak = parseInt(localStorage.getItem(STREAK_DAYS_KEY) || "0", 10) || 0;
+      if (lastActive === today) {
+        setStreakDays(storedStreak || 1);
+      } else {
+        const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
+        const nextStreak = lastActive === yesterday ? storedStreak + 1 : 1;
+        setStreakDays(nextStreak);
+        localStorage.setItem(STREAK_DAYS_KEY, nextStreak.toString());
+        localStorage.setItem(STREAK_LAST_ACTIVE_KEY, today);
       }
     } catch {
       // Ignore localStorage errors
@@ -235,6 +252,7 @@ export function RewardProvider({ children }: { children: React.ReactNode }) {
         isParentUnlocked,
         dailyQuizCoins,
         maxDailyQuizCoins: MAX_DAILY_QUIZ_COINS,
+        streakDays,
         addCoins,
         rewardItem,
         isItemRewarded,
