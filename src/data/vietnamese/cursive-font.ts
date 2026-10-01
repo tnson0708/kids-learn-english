@@ -22,11 +22,24 @@ const ADVANCE: Record<string, number> = {
   A: 1100, Ă: 1100, Â: 1100, B: 1000, C: 900, D: 900, Đ: 900, E: 800, Ê: 800, G: 1000,
   H: 1000, I: 600, K: 1000, L: 800, M: 1200, N: 1000, O: 900, Ô: 900, Ơ: 900, P: 700,
   Q: 900, R: 1100, S: 600, T: 900, U: 1100, Ư: 1100, V: 800, X: 900, Y: 1000,
+  // digits are 4 li (2 ô) tall
+  "0": 600, "1": 400, "2": 600, "3": 600, "4": 700, "5": 600, "6": 600, "7": 600, "8": 600, "9": 600,
 };
 
 /** Advance width of one letter, in li. */
 export function advanceLi(ch: string): number {
-  return (ADVANCE[ch] ?? 600) / FONT_UNITS_PER_LI;
+  // tone-marked letters (à, ấ, ợ…) share the advance of their base letter (a, â, ơ…)
+  const units =
+    ADVANCE[ch] ??
+    ADVANCE[ch.normalize("NFD").replace(/[\u0300\u0301\u0303\u0309\u0323]/g, "").normalize("NFC")] ??
+    ADVANCE[ch.normalize("NFD")[0]] ??
+    600;
+  return units / FONT_UNITS_PER_LI;
+}
+
+/** Advance width of a whole word, in li. */
+export function wordAdvanceLi(word: string): number {
+  return [...word.normalize("NFC")].reduce((sum, ch) => sum + advanceLi(ch), 0);
 }
 
 /**

@@ -14,7 +14,6 @@ import {
   Sparkles,
   HelpCircle,
   X,
-  FileText,
   PlayCircle,
   Scissors,
   ArrowDownCircle,
@@ -33,6 +32,10 @@ import {
   type SheetCase,
 } from "@/components/vietnamese/single-letter-practice-sheet";
 import { CursiveLetterCard } from "@/components/vietnamese/cursive-oly";
+import { ToneMarkPracticeSheet } from "@/components/vietnamese/tone-mark-practice-sheet";
+import { TONE_BASE_SYLLABLES } from "@/data/vietnamese/tones";
+import { NumberPracticeSheet, type NumberRange } from "@/components/vietnamese/number-practice-sheet";
+import { StrokePracticeSheet, strokeSheetPageCount } from "@/components/vietnamese/stroke-practice-sheet";
 
 // --- DATA STRUCTURES ---
 
@@ -256,116 +259,6 @@ type PrintTarget = {
 } | null;
 
 /**
- * High-precision Vector SVG Ruled Ô Ly Sheet Renderer
- * Draws authentic 4-line ô ly notebook lines with solid RED sample stroke at col 0
- * and DOTTED GRAY trace strokes at cols 1..9.
- */
-function RuledOlyVectorSheet({
-  strokeList,
-  rowsPerStroke,
-}: {
-  strokeList: typeof STROKE_GROUPS;
-  rowsPerStroke: number | ((idx: number) => number);
-}) {
-  const rowHeight = 52;
-  const getRowsCount = (idx: number) =>
-    typeof rowsPerStroke === "function" ? rowsPerStroke(idx) : rowsPerStroke;
-
-  const totalRows = Math.max(1, strokeList.reduce((sum, _, idx) => sum + getRowsCount(idx), 0));
-  const totalHeight = totalRows * rowHeight + 10;
-
-  let currentY = 5;
-  const rows: React.ReactNode[] = [];
-
-  strokeList.forEach((grp, strokeIdx) => {
-    const count = getRowsCount(strokeIdx);
-    for (let r = 0; r < count; r++) {
-      const rowKey = `${grp.id}-${r}`;
-      rows.push(
-        <g key={rowKey} transform={`translate(0, ${currentY})`}>
-          {/* Vertical Ô Ly Box Lines */}
-          {Array.from({ length: 11 }).map((_, cIdx) => (
-            <line
-              key={cIdx}
-              x1={20 + cIdx * 65}
-              y1={6}
-              x2={20 + cIdx * 65}
-              y2={48}
-              stroke="#bae6fd"
-              strokeWidth="0.7"
-            />
-          ))}
-
-          {/* 4 Horizontal Ô Ly Guide Lines */}
-          <line x1="10" y1={10} x2="690" y2={10} stroke="#0288d1" strokeWidth="0.8" />
-          <line x1="10" y1={19.5} x2="690" y2={19.5} stroke="#38bdf8" strokeWidth="0.6" strokeDasharray="3,2" />
-          <line x1="10" y1={29} x2="690" y2={29} stroke="#38bdf8" strokeWidth="0.6" strokeDasharray="3,2" />
-          <line x1="10" y1={38.5} x2="690" y2={38.5} stroke="#38bdf8" strokeWidth="0.6" strokeDasharray="3,2" />
-          <line x1="10" y1={48} x2="690" y2={48} stroke="#0288d1" strokeWidth="1.5" />
-
-          {/* Column 0: RED SAMPLE STROKE */}
-          <g transform="translate(20, 0)">
-            {grp.id === 0 && (
-              <line x1="32.5" y1="10" x2="32.5" y2="48" stroke="#dc2626" strokeWidth="3" strokeLinecap="round" />
-            )}
-            {grp.id === 1 && (
-              <line x1="22" y1="10" x2="43" y2="48" stroke="#dc2626" strokeWidth="3" strokeLinecap="round" />
-            )}
-            {grp.id === 2 && (
-              <ellipse cx="32.5" cy="38.5" rx="9" ry="9" fill="none" stroke="#dc2626" strokeWidth="3" />
-            )}
-            {grp.id === 3 && (
-              <path d="M 29 19.5 L 29 40 C 29 48 37 48 42 43" fill="none" stroke="#dc2626" strokeWidth="3" strokeLinecap="round" />
-            )}
-            {grp.id === 4 && (
-              <path d="M 23 43 L 37 15 C 39 8 31 8 29 19.5 L 29 48" fill="none" stroke="#dc2626" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-            )}
-          </g>
-
-          {/* Columns 1..9: DOTTED GREY TRACE STROKES */}
-          {Array.from({ length: 9 }).map((_, cIdx) => {
-            const xOffset = 20 + (cIdx + 1) * 65;
-            return (
-              <g key={cIdx} transform={`translate(${xOffset}, 0)`}>
-                {grp.id === 0 && (
-                  <line x1="32.5" y1="10" x2="32.5" y2="48" stroke="#64748b" strokeWidth="2" strokeDasharray="3,3" strokeLinecap="round" />
-                )}
-                {grp.id === 1 && (
-                  <line x1="22" y1="10" x2="43" y2="48" stroke="#64748b" strokeWidth="2" strokeDasharray="3,3" strokeLinecap="round" />
-                )}
-                {grp.id === 2 && (
-                  <ellipse cx="32.5" cy="38.5" rx="9" ry="9" fill="none" stroke="#64748b" strokeWidth="2" strokeDasharray="3,3" />
-                )}
-                {grp.id === 3 && (
-                  <path d="M 29 19.5 L 29 40 C 29 48 37 48 42 43" fill="none" stroke="#64748b" strokeWidth="2" strokeDasharray="3,3" strokeLinecap="round" />
-                )}
-                {grp.id === 4 && (
-                  <path d="M 23 43 L 37 15 C 39 8 31 8 29 19.5 L 29 48" fill="none" stroke="#64748b" strokeWidth="2" strokeDasharray="3,3" strokeLinecap="round" strokeLinejoin="round" />
-                )}
-              </g>
-            );
-          })}
-        </g>
-      );
-
-      currentY += rowHeight;
-    }
-  });
-
-  return (
-    <svg
-      viewBox={`0 0 700 ${totalHeight}`}
-      className="w-full h-auto bg-white rounded border border-sky-300 shadow-2xs"
-      style={{ shapeRendering: "geometricPrecision" }}
-    >
-      {/* Page Background */}
-      <rect x="0" y="0" width="700" height={totalHeight} fill="#f8fafc" />
-      {rows}
-    </svg>
-  );
-}
-
-/**
  * Parsed letter data for 29 Vietnamese letters (Uppercase + Lowercase).
  * `key` is the lowercase form used to look up stroke data in letter-strokes.ts.
  */
@@ -392,36 +285,6 @@ const CASE_MODE_LABEL: Record<VietnameseCaseMode, string> = {
   lowercase: "Chữ Viết Thường",
 };
 
-function WorksheetHeader({
-  title,
-  subtitle,
-  pageLabel,
-}: {
-  title: string;
-  subtitle: string;
-  pageLabel?: string;
-}) {
-  return (
-    <div className="flex items-center justify-between border-b-2 border-slate-800 pb-2">
-      <div>
-        <h1 className="text-base font-extrabold uppercase tracking-wide text-slate-900">
-          Bé Tự Học • Vở Bài Tập Tiền Tiểu Học (Khổ A4)
-        </h1>
-        <h2 className="text-sm font-bold text-[#D84315] mt-0.5">
-          {title}
-          {pageLabel ? ` (${pageLabel})` : ""}
-        </h2>
-        <p className="text-[11px] text-slate-600">{subtitle}</p>
-      </div>
-      <div className="text-right text-[11px] space-y-0.5">
-        <p>Họ và tên bé: ...........................................</p>
-        <p>Ngày làm bài: ...... / ...... / ......</p>
-        <p className="font-bold text-sky-800">Chuẩn Ô Ly Bộ GD&amp;ĐT</p>
-      </div>
-    </div>
-  );
-}
-
 export default function VietnameseStage1Page() {
   const [currentStrokeIdx, setCurrentStrokeIdx] = useState<number>(0); // Default Nét Thẳng (id: 0)
   const [activePrintTarget, setActivePrintTarget] = useState<PrintTarget>(null);
@@ -440,6 +303,10 @@ export default function VietnameseStage1Page() {
   const [letterCaseMode, setLetterCaseMode] = useState<VietnameseCaseMode>("both");
   const [selectedLetterPrintIdx, setSelectedLetterPrintIdx] = useState<number | "all">("all");
   const [olyLiMm, setOlyLiMm] = useState<OlyLiMm>(2.5);
+  // Section 3 printing: which toneless syllable to practise the 5 tone marks on
+  const [toneBase, setToneBase] = useState<string>("ba");
+  // Section 4 printing: which numbers to practise
+  const [numberRange, setNumberRange] = useState<NumberRange>("1-10");
 
   // Audio helper (speech audio without visual toast banner)
   const triggerVoicePrompt = (text: string) => {
@@ -499,7 +366,7 @@ export default function VietnameseStage1Page() {
     handlePrintTarget({
       id: "net",
       title: `Phiếu Bài Tập Ô Ly - ${STROKE_GROUPS[id].name}`,
-      subtitle: `Tô nét mờ chuẩn ô ly mầm non (Khổ A4)`,
+      subtitle: "Nét mẫu đỏ có chấm đặt bút, nét chấm để tô, chỗ trống tự viết",
       pages: 1,
     });
   };
@@ -509,7 +376,7 @@ export default function VietnameseStage1Page() {
     handlePrintTarget({
       id: "net",
       title: "Phiếu Tập Tô 5 Nhóm Nét Cơ Bản",
-      subtitle: "Thẳng, Xiên, Cong kín (O), Móc, Khuyết (Chuẩn Giấy Ô Ly)",
+      subtitle: "Thẳng, xiên, cong, móc, khuyết — nét mẫu đỏ có chấm đặt bút, nét chấm để tô",
       pages: 1,
     });
   };
@@ -531,20 +398,8 @@ export default function VietnameseStage1Page() {
 
   const currentStrokeData = STROKE_GROUPS[currentStrokeIdx];
 
-  // Selected strokes list for Section 1 printing
-  const activeStrokeList = STROKE_GROUPS.filter((g) => selectedStrokePrintIds.has(g.id));
-
-  // Dynamically calculate rows per stroke to ALWAYS fill 14-15 rows per A4 page
-  const getRowsForStroke = (strokeIdx: number) => {
-    const count = activeStrokeList.length;
-    if (count === 1) return 14;
-    if (count === 2) return 7;
-    if (count === 3) return 5;
-    if (count === 4) return strokeIdx < 2 ? 4 : 3;
-    return 3; // 5 strokes x 3 = 15 rows
-  };
-
-  const rowsPerStroke = getRowsForStroke;
+  // Section 1 printing: chosen stroke groups, drawn on the same ô ly grid as the other sheets
+  const strokePrintIds = [...selectedStrokePrintIds].sort((a, b) => a - b);
 
   return (
     <>
@@ -1019,7 +874,7 @@ export default function VietnameseStage1Page() {
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-600">
                   Cùng một tiếng &ldquo;BA&rdquo;, khi thêm dấu thanh khác nhau sẽ thay đổi hoàn toàn ý nghĩa. Bé nghe tra cứu đối chiếu trước khi làm bài trên{" "}
-                  <strong>&ldquo;Phiếu Điền Dấu Vào Chữ Bằng Bút Chì&rdquo;</strong>.
+                  <strong>&ldquo;Phiếu Tập Viết 5 Dấu Thanh&rdquo;</strong>.
                 </p>
               </div>
 
@@ -1029,15 +884,15 @@ export default function VietnameseStage1Page() {
                   onClick={() =>
                     handlePrintTarget({
                       id: "dauthanh",
-                      title: "Phiếu Bài Tập Điền 5 Dấu Thanh Bằng Chì",
-                      subtitle: "Thanh ngang, Huyền (\\), Sắc (/), Hỏi (?), Ngã (~), Nặng (.)",
-                      pages: 1,
+                      title: "Phiếu Tập Viết 5 Dấu Thanh",
+                      subtitle: "Trang 1: tập tô 5 dấu thanh trên ô ly — Trang 2: nghe và viết dấu",
+                      pages: 2,
                     })
                   }
                   className="px-4 py-2 rounded-full bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-2xs"
                 >
                   <Printer className="size-4" />
-                  <span>In Phiếu Điền Dấu (4 Ô Ly)</span>
+                  <span>In Phiếu Tập Viết Dấu Thanh</span>
                 </button>
               </div>
             </div>
@@ -1069,38 +924,6 @@ export default function VietnameseStage1Page() {
                 </div>
               ))}
             </div>
-
-            {/* Real Paper Exercise Description Card */}
-            <div className="p-4 rounded-2xl bg-[#FFFDF5] border border-amber-200/80 flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center text-[#FF5722] font-bold shrink-0">
-                  <FileText className="size-5" />
-                </div>
-                <div>
-                  <span className="text-xs sm:text-sm font-extrabold text-slate-900 block">
-                    Mẫu bài tập thực hành trên giấy: &ldquo;Điền Dấu Thanh Bằng Chì&rdquo;
-                  </span>
-                  <span className="text-xs text-slate-600">
-                    Trên phiếu in sẵn các chữ &ldquo;Ba&rdquo;, ô vuông trên đầu để trống. Bé nghe cô giáo đọc âm nào thì dùng bút chì nắn nót đánh dấu thanh tương ứng vào ô vuông đó.
-                  </span>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() =>
-                  handlePrintTarget({
-                    id: "dauthanh",
-                    title: "Phiếu Bài Tập Điền 5 Dấu Thanh Bằng Chì",
-                    subtitle: "Thanh ngang, Huyền (\\), Sắc (/), Hỏi (?), Ngã (~), Nặng (.)",
-                    pages: 1,
-                  })
-                }
-                className="px-4 py-2 rounded-full bg-[#FF5722] hover:bg-orange-600 text-white font-extrabold text-xs shadow-2xs shrink-0 flex items-center gap-1.5 transition-colors"
-              >
-                <Printer className="size-4" />
-                <span>In Phiếu Điền Dấu 4 Ô Ly</span>
-              </button>
-            </div>
           </section>
 
           {/* SECTION 4: SỐ ĐẾM 1 ĐẾN 10 */}
@@ -1116,7 +939,7 @@ export default function VietnameseStage1Page() {
                   <span>🔢</span> 4. Số Đếm 1 Đến 10 (Chuẩn Nét Chữ Số Mầm Non)
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-600">
-                  Mỗi ô thể hiện rõ hình dáng chữ số cao 2 ô ly và số lượng chấm tròn trực quan. Chạm để nghe đọc số trước khi làm phiếu nối và tô số trên giấy.
+                  Mỗi ô thể hiện chữ số viết tay chuẩn tiểu học (cao 4 li = 2 ô) và số lượng chấm tròn. Chạm để nghe đọc số trước khi làm phiếu tập viết số.
                 </p>
               </div>
 
@@ -1126,15 +949,15 @@ export default function VietnameseStage1Page() {
                   onClick={() =>
                     handlePrintTarget({
                       id: "sodem",
-                      title: "Phiếu Tô Số 1-10 & Đếm Chấm Tròn",
-                      subtitle: "Chữ số cao 2 ô ly chuẩn mầm non + bài tập nối lượng chấm",
-                      pages: 1,
+                      title: "Phiếu Tập Viết Số",
+                      subtitle: "Tô chữ số cao 4 li (2 ô) trên ô ly + đếm chấm viết số + điền số còn thiếu",
+                      pages: 2,
                     })
                   }
                   className="px-4 py-2 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-2xs"
                 >
                   <Printer className="size-4" />
-                  <span>In Phiếu Tô Số &amp; Đếm Chấm</span>
+                  <span>In Phiếu Tập Viết Số</span>
                 </button>
               </div>
             </div>
@@ -1149,8 +972,8 @@ export default function VietnameseStage1Page() {
                   className="p-3 rounded-2xl bg-white hover:bg-orange-50/60 border border-slate-200 flex flex-col items-center justify-between text-center group transition-all shadow-2xs"
                 >
                   <span
-                    className={`text-3xl font-black font-heading ${
-                      item.isPrimary ? "text-[#FF5722]" : "text-sky-700"
+                    className={`font-tapviet text-[64px] leading-none pt-2 ${
+                      item.isPrimary ? "text-red-600" : "text-sky-700"
                     }`}
                   >
                     {item.num}
@@ -1295,7 +1118,7 @@ export default function VietnameseStage1Page() {
                     <p className="text-[11px] text-slate-500">{activePrintTarget.subtitle}</p>
                   </div>
                   <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-[#D84315] text-xs font-bold shrink-0">
-                    {activePrintTarget.id === "chucai" ? letterPrintIdxs.length : activePrintTarget.pages} Trang A4
+                    {activePrintTarget.id === "net" ? strokeSheetPageCount(strokePrintIds, olyLiMm) : activePrintTarget.id === "chucai" ? letterPrintIdxs.length : activePrintTarget.id === "sodem" ? (olyLiMm === 4 ? 3 : 2) : activePrintTarget.pages} Trang A4
                   </span>
                 </div>
 
@@ -1395,11 +1218,8 @@ export default function VietnameseStage1Page() {
                   </div>
 
                   {activePrintTarget.id === "net" && (
-                    <div className="max-h-60 overflow-y-auto border border-sky-300 rounded">
-                      <RuledOlyVectorSheet
-                        strokeList={activeStrokeList}
-                        rowsPerStroke={rowsPerStroke}
-                      />
+                    <div className="max-h-80 overflow-y-auto border border-sky-300 rounded bg-white p-2">
+                      <StrokePracticeSheet groupIds={strokePrintIds} liMm={olyLiMm} previewOnly />
                     </div>
                   )}
 
@@ -1420,36 +1240,68 @@ export default function VietnameseStage1Page() {
                   )}
 
                   {activePrintTarget.id === "dauthanh" && (
-                    <div className="p-3 border border-purple-200 bg-purple-50/30 rounded-lg space-y-2 text-xs">
-                      <div className="text-[11px] font-bold text-slate-800">Điền dấu thanh bằng chì (Ba + ô vuông):</div>
-                      <div className="grid grid-cols-3 gap-2 font-mono text-xs font-bold text-purple-900">
-                        <div className="p-1 border bg-white text-center">Ba [  ]</div>
-                        <div className="p-1 border bg-white text-center">Ba [ \ ]</div>
-                        <div className="p-1 border bg-white text-center">Ba [ / ]</div>
-                        <div className="p-1 border bg-white text-center">Ba [ ? ]</div>
-                        <div className="p-1 border bg-white text-center">Ba [ ~ ]</div>
-                        <div className="p-1 border bg-white text-center">Ba [ . ]</div>
-                      </div>
+                    <div className="max-h-80 overflow-y-auto border border-sky-300 rounded bg-white p-2">
+                      <ToneMarkPracticeSheet base={toneBase} liMm={olyLiMm} />
                     </div>
                   )}
 
                   {activePrintTarget.id === "sodem" && (
-                    <div className="p-3 border border-emerald-200 bg-emerald-50/30 rounded-lg space-y-2 text-xs">
-                      <div className="text-[11px] font-bold text-slate-800">Tô chữ số 1-10 &amp; đếm lượng chấm:</div>
-                      <div className="grid grid-cols-5 gap-1.5 font-mono text-xs font-bold text-emerald-900 text-center">
-                        {NUMBERS_10.map((n) => (
-                          <div key={n.num} className="p-1 border bg-white">
-                            <div>{n.num}</div>
-                            <div className="text-[9px] text-[#FF5722]">{"•".repeat(n.dots)}</div>
-                          </div>
-                        ))}
-                      </div>
+                    <div className="max-h-80 overflow-y-auto border border-sky-300 rounded bg-white p-2">
+                      <NumberPracticeSheet range={numberRange} liMm={olyLiMm} previewOnly />
                     </div>
                   )}
                 </div>
 
                 {/* Settings */}
-                {activePrintTarget.id === "chucai" && (
+                {activePrintTarget.id === "dauthanh" && (
+                  <div className="text-xs">
+                    <span className="font-bold text-slate-800 block mb-1">Tiếng để tập 5 dấu thanh:</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {TONE_BASE_SYLLABLES.map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          onClick={() => setToneBase(s)}
+                          className={`px-3 py-1 rounded-lg text-xs font-bold border transition-colors ${
+                            toneBase === s
+                              ? "bg-purple-700 text-white border-purple-700 shadow-xs"
+                              : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100"
+                          }`}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="mt-1 text-[11px] text-slate-500">
+                      Trang 1: tập tô {toneBase} và 5 dấu thanh. Trang 2: nghe và viết dấu{toneBase === "ba" ? " (có hình gợi ý)" : ""}, kèm đáp án.
+                    </p>
+                  </div>
+                )}
+                {activePrintTarget.id === "sodem" && (
+                  <div className="text-xs">
+                    <span className="font-bold text-slate-800 block mb-1">Dãy số cần tập:</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {(["1-10", "0-9"] as const).map((r) => (
+                        <button
+                          key={r}
+                          type="button"
+                          onClick={() => setNumberRange(r)}
+                          className={`px-3 py-1 rounded-lg text-xs font-bold border transition-colors ${
+                            numberRange === r
+                              ? "bg-emerald-700 text-white border-emerald-700 shadow-xs"
+                              : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100"
+                          }`}
+                        >
+                          Số {r.replace("-", " – ")}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="mt-1 text-[11px] text-slate-500">
+                      Trang tập tô: mỗi số 1 dòng (số mẫu đỏ → số chấm để tô → chỗ trống tự viết). Trang cuối: đếm chấm viết số và điền số còn thiếu, kèm đáp án.
+                    </p>
+                  </div>
+                )}
+                {(activePrintTarget.id === "net" || activePrintTarget.id === "chucai" || activePrintTarget.id === "dauthanh" || activePrintTarget.id === "sodem") && (
                   <div className="text-xs">
                     <label htmlFor="oly-li-size" className="font-bold text-slate-800 block mb-1">
                       Cỡ ô ly khi in:
@@ -1498,26 +1350,9 @@ export default function VietnameseStage1Page() {
         {activePrintTarget ? (
           <div className="space-y-2">
             {/* Header of Worksheet (the 29-letter sheet prints its own header on every page) */}
-            {activePrintTarget.id !== "chucai" && (
-              <WorksheetHeader title={activePrintTarget.title} subtitle={activePrintTarget.subtitle} />
-            )}
 
-            {/* PRINTABLE CONTENT FOR SECTION 1: 5 NHÓM NÉT (HIGH-PRECISION VECTOR SVG Ô LY SHEET) */}
-            {activePrintTarget.id === "net" && (
-              <div className="space-y-2 pt-0">
-                <p className="text-[11px] font-bold italic text-slate-700">
-                  Hướng dẫn: Bé dùng bút chì 2B nắn nót tô đè theo các nét mờ trên dòng kẻ ô ly bên dưới.
-                </p>
-
-                {/* Razor-sharp High-Precision Vector SVG Ô Ly Sheet */}
-                <div className="w-full">
-                  <RuledOlyVectorSheet
-                    strokeList={activeStrokeList}
-                    rowsPerStroke={rowsPerStroke}
-                  />
-                </div>
-              </div>
-            )}
+            {/* PRINTABLE CONTENT FOR SECTION 1: 5 NHÓM NÉT — same ô ly style as the other sheets */}
+            {activePrintTarget.id === "net" && <StrokePracticeSheet groupIds={strokePrintIds} liMm={olyLiMm} />}
 
             {/* PRINTABLE CONTENT FOR SECTION 2: 29 CHỮ CÁI — one handwriting-font ô ly page per letter */}
             {activePrintTarget.id === "chucai" &&
@@ -1532,51 +1367,11 @@ export default function VietnameseStage1Page() {
                 </div>
               ))}
 
-            {/* PRINTABLE CONTENT FOR SECTION 3: 5 DẤU THANH */}
-            {activePrintTarget.id === "dauthanh" && (
-              <div className="space-y-2 pt-0">
-                <p className="text-[11px] font-bold italic text-slate-700">
-                  Hướng dẫn: Bé nghe cô giáo đọc âm nào thì dùng bút chì đánh dấu thanh tương ứng vào ô vuông trên đầu chữ.
-                </p>
-                <div className="grid grid-cols-2 gap-3 pt-1">
-                  {Array.from({ length: 10 }).map((_, idx) => (
-                    <div key={idx} className="border-2 border-slate-300 p-2 rounded-lg flex items-center justify-between bg-purple-50/20">
-                      <div className="text-[11px] font-bold">Bài tập {idx + 1}: Nghe &amp; đánh dấu</div>
-                      <div className="flex items-center gap-3 text-xl font-mono font-bold">
-                        <div className="flex flex-col items-center">
-                          <div className="w-6 h-6 border-2 border-dashed border-slate-400 rounded flex items-center justify-center text-[10px] text-slate-400">
-                            dấu
-                          </div>
-                          <span>Ba</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* PRINTABLE CONTENT FOR SECTION 3: 5 DẤU THANH — tracing page + listening page */}
+            {activePrintTarget.id === "dauthanh" && <ToneMarkPracticeSheet base={toneBase} liMm={olyLiMm} />}
 
-            {/* PRINTABLE CONTENT FOR SECTION 4: SỐ ĐẾM 1-10 */}
-            {activePrintTarget.id === "sodem" && (
-              <div className="space-y-2 pt-0">
-                <p className="text-[11px] font-bold italic text-slate-700">
-                  Hướng dẫn: Bé tập tô các chữ số từ 1 đến 10 cao 2 ô ly và nối với nhóm có số lượng chấm tròn tương ứng.
-                </p>
-                <div className="grid grid-cols-2 gap-2 pt-1">
-                  {NUMBERS_10.map((num) => (
-                    <div key={num.num} className="border border-slate-300 p-2 rounded bg-emerald-50/20 flex items-center justify-between">
-                      <div className="text-lg font-bold font-mono text-[#D84315]">{num.num} ({num.text})</div>
-                      <div className="flex items-center gap-1 text-sm text-slate-600">
-                        {"●".repeat(num.dots)}
-                      </div>
-                      <div className="text-[11px] text-slate-400 font-mono">
-                        {num.num} {num.num} · ·
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* PRINTABLE CONTENT FOR SECTION 4: tập viết số + đếm chấm + điền số */}
+            {activePrintTarget.id === "sodem" && <NumberPracticeSheet range={numberRange} liMm={olyLiMm} />}
 
             {/* Footer of Printable Sheet */}
             <div className="pt-2 border-t border-slate-300 flex items-center justify-between text-[11px] text-slate-500">
