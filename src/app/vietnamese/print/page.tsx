@@ -5,7 +5,7 @@ import { Printer } from "lucide-react";
 import { VIETNAMESE_LETTERS, type VietnameseCaseMode } from "@/data/vietnamese/alphabet";
 import { NGUYEN_AM, PHU_AM } from "@/data/vietnamese/blending";
 import { generateMathItems, type MathItem, type MathWorksheetType } from "@/data/vietnamese/math";
-import { TraceSheet } from "@/components/vietnamese/trace-sheet";
+import { SingleLetterPracticeSheet } from "@/components/vietnamese/single-letter-practice-sheet";
 import { BlendingTable } from "@/components/vietnamese/blending-table";
 import { MathWorksheet } from "@/components/vietnamese/math-worksheet";
 import { useLanguage } from "@/lib/language-context";
@@ -308,7 +308,17 @@ export default function VietnamesePrintPage() {
             (worksheet.letters.length === 0 ? (
               <p className="py-10 text-center text-sm text-muted-foreground">{t("vi_choose_at_least_one_letter")}</p>
             ) : (
-              <TraceSheet letters={worksheet.letters} mode={worksheet.mode} rows={worksheet.rows} />
+              <div className="flex flex-col gap-8">
+                {worksheet.letters.map((letterKey, idx) => (
+                  <div key={letterKey} className={idx > 0 ? "page-break pt-4" : ""}>
+                    <SingleLetterPracticeSheet
+                      letter={letterKey}
+                      letterCase={worksheet.mode === "uppercase" ? "upper" : worksheet.mode === "both" ? "both" : "lower"}
+                      indexNumber={idx + 1}
+                    />
+                  </div>
+                ))}
+              </div>
             ))}
 
           {worksheet?.kind === "van" &&

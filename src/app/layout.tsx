@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Baloo_2, Nunito } from "next/font/google";
 import { Nav } from "@/components/nav";
+import { tapDoFont, tapVietFont } from "@/lib/handwriting-fonts";
 import { Providers } from "@/app/providers";
 import "./globals.css";
 
@@ -55,7 +56,7 @@ export default function RootLayout({
   return (
     <html
       lang="vi"
-      className={`${sansFont.variable} ${headingFont.variable} h-full antialiased font-sans`}
+      className={`${sansFont.variable} ${headingFont.variable} ${tapVietFont.variable} ${tapDoFont.variable} h-full antialiased font-sans`}
     >
       <head>
         <link rel="icon" href="/favicon.ico?v=2" sizes="any" />

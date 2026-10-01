@@ -27,13 +27,12 @@ import { speakVietnamese } from "@/lib/speech";
 import { letterForms, type VietnameseCaseMode } from "@/data/vietnamese/alphabet";
 import type { LetterCase } from "@/data/vietnamese/letter-strokes";
 import { LetterStrokeGuide } from "@/components/vietnamese/letter-stroke-guide";
+import { type OlyLiMm } from "@/components/vietnamese/letter-trace-sheet";
 import {
-  LetterTraceSheet,
-  buildTraceRows,
-  paginateRows,
-  sheetLayout,
-  type OlyLiMm,
-} from "@/components/vietnamese/letter-trace-sheet";
+  SingleLetterPracticeSheet,
+  type SheetCase,
+} from "@/components/vietnamese/single-letter-practice-sheet";
+import { CursiveLetterCard } from "@/components/vietnamese/cursive-oly";
 
 // --- DATA STRUCTURES ---
 
@@ -520,17 +519,11 @@ export default function VietnameseStage1Page() {
     window.print();
   };
 
-  // Section 2 print sheet: rows + pagination derived from the current print settings
-  const sheet = sheetLayout(olyLiMm);
-  const printLetterKeys =
-    selectedLetterPrintIdx === "all"
-      ? PARSED_LETTERS_29.map((l) => l.key)
-      : [PARSED_LETTERS_29[selectedLetterPrintIdx].key];
-  const casesPerLetter = letterCaseMode === "both" ? 2 : 1;
-  const rowsPerLetter =
-    selectedLetterPrintIdx === "all" ? 1 : Math.max(1, Math.floor(sheet.rowsPerPage / casesPerLetter));
-  const letterPrintRows = buildTraceRows(printLetterKeys, letterCaseMode, rowsPerLetter);
-  const letterPrintPages = paginateRows(letterPrintRows, sheet.rowsPerPage);
+  // Section 2 print sheet: one A4 page per letter, drawn with the handwriting font
+  const sheetCase: SheetCase =
+    letterCaseMode === "uppercase" ? "upper" : letterCaseMode === "lowercase" ? "lower" : "both";
+  const letterPrintIdxs =
+    selectedLetterPrintIdx === "all" ? PARSED_LETTERS_29.map((_, i) => i) : [selectedLetterPrintIdx];
   const selectedLetter = PARSED_LETTERS_29[selectedLetterIdx];
   // When the board only shows one case, the guide follows it
   const effectiveGuideCase: LetterCase =
@@ -906,7 +899,7 @@ export default function VietnameseStage1Page() {
                             : "bg-slate-50/70 hover:bg-orange-50/80 border-slate-200/80"
                         }`}
                       >
-                        <span className="text-xl sm:text-2xl font-black text-[#FF5722] font-heading whitespace-nowrap">
+                        <span className="font-tapviet text-[52px] sm:text-[60px] leading-none pt-3 text-red-600 whitespace-nowrap">
                           {letterForms(item.key, boardCaseMode).join(" ")}
                         </span>
                         <Volume2
@@ -965,11 +958,25 @@ export default function VietnameseStage1Page() {
                   </div>
                 )}
 
-                <LetterStrokeGuide
-                  key={`${selectedLetter.key}-${effectiveGuideCase}`}
-                  letter={selectedLetter.key}
-                  letterCase={effectiveGuideCase}
+                <CursiveLetterCard
+                  letters={
+                    boardCaseMode === "both"
+                      ? [selectedLetter.upper, selectedLetter.lower]
+                      : [effectiveGuideCase === "upper" ? selectedLetter.upper : selectedLetter.lower]
+                  }
                 />
+
+                <details className="group rounded-2xl border border-slate-200 bg-slate-50/60 px-3 py-2">
+                  <summary className="cursor-pointer text-xs font-bold text-slate-600 select-none">
+                    Xem hoạt hình thứ tự nét (chữ in)
+                  </summary>
+                  <LetterStrokeGuide
+                    key={`${selectedLetter.key}-${effectiveGuideCase}`}
+                    letter={selectedLetter.key}
+                    letterCase={effectiveGuideCase}
+                    className="mt-2"
+                  />
+                </details>
 
                 <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-100">
                   <button
@@ -1288,7 +1295,7 @@ export default function VietnameseStage1Page() {
                     <p className="text-[11px] text-slate-500">{activePrintTarget.subtitle}</p>
                   </div>
                   <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-[#D84315] text-xs font-bold shrink-0">
-                    {activePrintTarget.id === "chucai" ? letterPrintPages.length : activePrintTarget.pages} Trang A4
+                    {activePrintTarget.id === "chucai" ? letterPrintIdxs.length : activePrintTarget.pages} Trang A4
                   </span>
                 </div>
 
@@ -1374,10 +1381,8 @@ export default function VietnameseStage1Page() {
                       </div>
                     </div>
                     <p className="text-[11px] text-slate-600">
-                      Mỗi dòng: 1 chữ mẫu đỏ có đánh số nét → {Math.max(1, Math.round((sheet.cellsPerRow - 1) * 0.6))} chữ chấm mờ để tô → {sheet.cellsPerRow - 1 - Math.max(1, Math.round((sheet.cellsPerRow - 1) * 0.6))} ô trống bé tự viết.
-                      {selectedLetterPrintIdx === "all"
-                        ? ` Mỗi chữ ${letterCaseMode === "both" ? "2 dòng (hoa + thường)" : "1 dòng"}, ${sheet.rowsPerPage} dòng/trang.`
-                        : ` ${rowsPerLetter} dòng cho mỗi kiểu chữ, vừa đúng 1 trang A4.`}
+                      Mỗi chữ 1 trang A4 viết bằng font chữ tiểu học: dòng đầu chữ mẫu đỏ → các dòng chữ chấm để tô → dòng có chữ mẫu đỏ ở đầu để bé tự viết.
+                      {selectedLetterPrintIdx === "all" ? " In cả 29 chữ = 29 trang." : ""}
                     </p>
                   </div>
                 )}
@@ -1399,11 +1404,16 @@ export default function VietnameseStage1Page() {
                   )}
 
                   {activePrintTarget.id === "chucai" && (
-                    <div className="max-h-64 overflow-y-auto border border-sky-300 rounded bg-white">
-                      <LetterTraceSheet rows={letterPrintPages[0] ?? []} liMm={olyLiMm} />
-                      {letterPrintPages.length > 1 && (
+                    <div className="max-h-80 overflow-y-auto border border-sky-300 rounded bg-white p-2">
+                      <SingleLetterPracticeSheet
+                        letter={PARSED_LETTERS_29[letterPrintIdxs[0]].key}
+                        letterCase={sheetCase}
+                        indexNumber={letterPrintIdxs[0] + 1}
+                        liMm={olyLiMm}
+                      />
+                      {letterPrintIdxs.length > 1 && (
                         <p className="text-[10px] text-slate-500 text-center py-1">
-                          Xem trước trang 1 / {letterPrintPages.length}
+                          Xem trước trang 1 / {letterPrintIdxs.length}
                         </p>
                       )}
                     </div>
@@ -1450,8 +1460,8 @@ export default function VietnameseStage1Page() {
                       onChange={(e) => setOlyLiMm(e.target.value === "4" ? 4 : 2.5)}
                       className="w-full py-1.5 px-2.5 rounded-lg bg-white border border-slate-200 text-slate-800 text-xs"
                     >
-                      <option value="2.5">Ô ly chuẩn 2,5 mm (giống vở ô ly lớp 1) — {sheetLayout(2.5).rowsPerPage} dòng/trang</option>
-                      <option value="4">Ô ly to 4 mm (dễ tô cho bé mầm non) — {sheetLayout(4).rowsPerPage} dòng/trang</option>
+                      <option value="2.5">Ô ly chuẩn 2,5 mm (giống vở ô ly lớp 1) — 10 dòng/trang</option>
+                      <option value="4">Ô ly to 4 mm (dễ tô cho bé mầm non) — 6 dòng/trang</option>
                     </select>
                   </div>
                 )}
@@ -1509,19 +1519,16 @@ export default function VietnameseStage1Page() {
               </div>
             )}
 
-            {/* PRINTABLE CONTENT FOR SECTION 2: 29 CHỮ CÁI (stroke-accurate ô ly sheet, paginated) */}
+            {/* PRINTABLE CONTENT FOR SECTION 2: 29 CHỮ CÁI — one handwriting-font ô ly page per letter */}
             {activePrintTarget.id === "chucai" &&
-              letterPrintPages.map((pageRows, pageIdx) => (
-                <div key={pageIdx} className={pageIdx > 0 ? "page-break pt-2 space-y-2" : "space-y-2"}>
-                  <WorksheetHeader
-                    title={activePrintTarget.title}
-                    subtitle={activePrintTarget.subtitle}
-                    pageLabel={letterPrintPages.length > 1 ? `Trang ${pageIdx + 1}/${letterPrintPages.length}` : undefined}
+              letterPrintIdxs.map((letterIdx, pageIdx) => (
+                <div key={PARSED_LETTERS_29[letterIdx].key} className={pageIdx > 0 ? "page-break pt-2" : ""}>
+                  <SingleLetterPracticeSheet
+                    letter={PARSED_LETTERS_29[letterIdx].key}
+                    letterCase={sheetCase}
+                    indexNumber={letterIdx + 1}
+                    liMm={olyLiMm}
                   />
-                  <p className="text-[11px] font-bold italic text-slate-700">
-                    Hướng dẫn: Bé nhìn chữ mẫu màu đỏ (số 1, 2, 3 là thứ tự nét), dùng bút chì 2B tô đè các chữ chấm mờ, rồi tự viết vào các ô trống còn lại. {CASE_MODE_LABEL[letterCaseMode]} • Ô ly {olyLiMm === 4 ? "4 mm" : "2,5 mm"}.
-                  </p>
-                  <LetterTraceSheet rows={pageRows} liMm={olyLiMm} forPrint />
                 </div>
               ))}
 
