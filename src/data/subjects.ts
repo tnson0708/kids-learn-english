@@ -33,8 +33,15 @@ export const subjects: Subject[] = [
     labelKey: "subject_math",
     descKey: "subject_math_desc",
     emoji: "🧮",
-    accent: "soon",
-    status: "soon",
+    accent: "vietnamese",
+    status: "active",
+    lessons: [
+      { labelKey: "math_nav_numbers", href: "/math/numbers" },
+      { labelKey: "math_nav_compare", href: "/math/compare" },
+      { labelKey: "math_nav_arithmetic", href: "/math/arithmetic" },
+      { labelKey: "math_nav_shapes", href: "/math/shapes" },
+      { labelKey: "math_nav_print", href: "/math/print" },
+    ],
   },
   {
     id: "english",

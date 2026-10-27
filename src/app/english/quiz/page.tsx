@@ -11,13 +11,23 @@ export default function QuizSelectionPage() {
   const { t } = useLanguage();
 
   const modes: {
-    id: QuizMode;
+    id: QuizMode | "zoo";
+    href?: string;
     titleKey: TranslationKey;
     descKey: TranslationKey;
     emoji: string;
     icon: typeof Volume2;
     gradient: string;
   }[] = [
+    {
+      id: "zoo",
+      href: "/english/quiz/zoo-memory",
+      titleKey: "quiz_mode_zoo",
+      descKey: "quiz_desc_zoo",
+      emoji: "🦁",
+      icon: Dog,
+      gradient: "from-emerald-200 via-lime-100 to-amber-200",
+    },
     {
       id: "listen",
       titleKey: "quiz_mode_listen",
@@ -81,7 +91,7 @@ export default function QuizSelectionPage() {
         {modes.map((mode) => {
           const Icon = mode.icon;
           return (
-            <Link key={mode.id} href={`/english/quiz/play?mode=${mode.id}`} className="group block">
+            <Link key={mode.id} href={mode.href ?? `/english/quiz/play?mode=${mode.id}`} className="group block">
               <Card
                 className={`flex h-full flex-col justify-between rounded-2xl border-none bg-gradient-to-br ${mode.gradient} p-4 shadow-md transition-all duration-200 group-hover:-translate-y-1.5 group-hover:shadow-xl group-active:scale-95 sm:rounded-3xl sm:p-7`}
               >

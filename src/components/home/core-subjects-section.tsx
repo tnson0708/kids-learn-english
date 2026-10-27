@@ -87,37 +87,37 @@ export function CoreSubjectsSection() {
           </div>
         </div>
 
-        {/* Subject 2: Toán Học (Preview / Under development) */}
-        <div className="clay-card bg-white border-2 border-amber-100 p-5 flex flex-col justify-between rounded-3xl group">
+        {/* Subject 2: Toán Học (Active & Ready) */}
+        <div className="clay-card bg-white border-2 border-emerald-100 p-5 flex flex-col justify-between rounded-3xl group">
           <div className="space-y-4">
-            <div className="h-32 bg-gradient-to-b from-amber-50 to-yellow-100/60 rounded-2xl flex items-center justify-center text-5xl relative group-hover:scale-105 transition-transform duration-300">
+            <div className="h-32 bg-gradient-to-b from-emerald-50 to-teal-100/60 rounded-2xl flex items-center justify-center text-5xl group-hover:scale-105 transition-transform duration-300">
               {mathSubject.emoji}
-              <span className="absolute top-2.5 right-2.5 text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-full">
-                {t("soon_badge")}
-              </span>
             </div>
             <div>
               <div className="flex items-center justify-between mb-1">
                 <h3 className="text-xl font-extrabold text-gray-900">{t(mathSubject.labelKey)}</h3>
+                <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                  {t("core_ready_to_start")}
+                </span>
               </div>
               <p className="text-xs font-medium text-gray-500 line-clamp-2">
                 {t(mathSubject.descKey)}
               </p>
             </div>
-            <div className="bg-amber-50/60 border border-amber-200/60 rounded-xl p-2.5 text-[11px] font-semibold text-amber-900 flex items-center gap-2">
-              <span>🛠️</span>
-              <span>{t("core_locked_note")}</span>
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              <span className="text-[11px] font-bold px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-md border border-emerald-200">
+                Số đếm · So sánh · Tách gộp · Cộng trừ
+              </span>
             </div>
           </div>
           <div className="pt-5 mt-4 border-t border-gray-100">
-            <button
-              type="button"
-              disabled
-              className="w-full py-3 px-4 rounded-xl bg-amber-100/80 text-amber-900 font-bold text-sm flex items-center justify-center gap-2 cursor-not-allowed opacity-80"
+            <Link
+              href={mathSubject.href}
+              className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-md shadow-emerald-500/20 active:scale-95 transition-all"
             >
-              <Lock className="size-4" />
-              <span>Xem trước bài học</span>
-            </button>
+              <span>Học Toán Ngay</span>
+              <ArrowRight className="size-4" />
+            </Link>
           </div>
         </div>
 
