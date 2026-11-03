@@ -2,18 +2,31 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, RotateCcw, Star } from "lucide-react";
-import { buildZooDeck, getPairsForLevel, getStars, type ZooCard } from "@/data/english/zoo-memory";
+import { ArrowLeft, Pause, Play, RotateCcw, Star, Timer } from "lucide-react";
+import {
+  buildZooDeck,
+  getCoinReward,
+  getPairsForLevel,
+  getStars,
+  getTimeLimitForLevel,
+  EMPTY_BEST_LEVELS,
+  loadBestLevels,
+  saveBestLevels,
+  ZOO_DIFFICULTIES,
+  type ZooBestLevels,
+  type ZooCard,
+  type ZooDifficulty,
+} from "@/data/english/zoo-memory";
 import { useVoice } from "@/lib/voice-context";
 import { useLanguage } from "@/lib/language-context";
 import { useReward } from "@/lib/reward-context";
-import { playCorrectSound, playVictorySound } from "@/lib/sound-effects";
+import { playCorrectSound, playVictorySound, playWrongSound } from "@/lib/sound-effects";
 import { ConfettiEffect } from "@/components/english/quiz/confetti-effect";
 import { GoldCoin } from "@/components/gold-coin";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-type Phase = "intro" | "playing" | "complete";
+type Phase = "intro" | "playing" | "complete" | "timeout";
 
 const GRID_CLASSES: Record<number, string> = {
   4: "grid-cols-2 max-w-xs",
@@ -27,7 +40,14 @@ const GRID_CLASSES: Record<number, string> = {
 
 const FLIP_BACK_DELAY_MS = 1000;
 const MATCH_DELAY_MS = 500;
-const COINS_PER_LEVEL = 5;
+const MATCH_BONUS_SECONDS = 2;
+const BONUS_FLASH_MS = 1000;
+
+const DIFFICULTY_EMOJI: Record<ZooDifficulty, string> = {
+  easy: "🐢",
+  normal: "🐰",
+  hard: "🐆",
+};
 
 const faceStyle = {
   backfaceVisibility: "hidden",
@@ -41,6 +61,7 @@ export default function ZooMemoryPage() {
 
   const [phase, setPhase] = useState<Phase>("intro");
   const [level, setLevel] = useState(1);
+  const [difficulty, setDifficulty] = useState<ZooDifficulty>("normal");
   const [cards, setCards] = useState<ZooCard[]>([]);
   const [openUids, setOpenUids] = useState<string[]>([]);
   const [matchedIds, setMatchedIds] = useState<string[]>([]);
@@ -48,12 +69,70 @@ export default function ZooMemoryPage() {
   const [locked, setLocked] = useState(false);
   const [stars, setStars] = useState<1 | 2 | 3>(3);
   const [coinsEarned, setCoinsEarned] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [showBonus, setShowBonus] = useState(false);
+  const [bestLevels, setBestLevels] = useState<ZooBestLevels>(EMPTY_BEST_LEVELS);
+  const [newRecord, setNewRecord] = useState(false);
 
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
-    return () => timers.current.forEach(clearTimeout);
+    const loadBest = setTimeout(() => setBestLevels(loadBestLevels()), 0);
+    return () => {
+      clearTimeout(loadBest);
+      timers.current.forEach(clearTimeout);
+    };
   }, []);
+
+  const pairs = getPairsForLevel(level);
+  const timeLimit = getTimeLimitForLevel(level, difficulty);
+  const allMatched = matchedIds.length === pairs;
+
+  useEffect(() => {
+    if (phase !== "playing" || allMatched || paused) return;
+    const tick = setTimeout(() => {
+      if (timeLeft > 1) {
+        setTimeLeft(timeLeft - 1);
+        return;
+      }
+      timers.current.forEach(clearTimeout);
+      timers.current = [];
+      setTimeLeft(0);
+      setOpenUids([]);
+      setLocked(false);
+      setShowBonus(false);
+      setPhase("timeout");
+      playWrongSound();
+    }, 1000);
+    return () => clearTimeout(tick);
+  }, [phase, allMatched, paused, timeLeft]);
+
+  useEffect(() => {
+    if (phase !== "playing" || !allMatched) return;
+    const done = setTimeout(() => {
+      setStars(getStars(moves, pairs));
+      setCoinsEarned(addQuizCoins(getCoinReward(difficulty, timeLeft, timeLimit)));
+      if (level > bestLevels[difficulty]) {
+        const nextBest = { ...bestLevels, [difficulty]: level };
+        setBestLevels(nextBest);
+        saveBestLevels(nextBest);
+        setNewRecord(true);
+      }
+      setPhase("complete");
+      playVictorySound();
+    }, 700);
+    return () => clearTimeout(done);
+  }, [phase, allMatched, moves, pairs, level, difficulty, bestLevels, timeLeft, timeLimit, addQuizCoins]);
+
+  useEffect(() => {
+    if (phase !== "playing") return;
+    const pauseWhenHidden = () => {
+      if (document.hidden) setPaused(true);
+    };
+    document.addEventListener("visibilitychange", pauseWhenHidden);
+    return () => document.removeEventListener("visibilitychange", pauseWhenHidden);
+  }, [phase]);
 
   const later = (fn: () => void, ms: number) => {
     timers.current.push(setTimeout(fn, ms));
@@ -69,13 +148,15 @@ export default function ZooMemoryPage() {
     setMoves(0);
     setLocked(false);
     setCoinsEarned(0);
+    setTimeLeft(getTimeLimitForLevel(nextLevel, difficulty));
+    setPaused(false);
+    setShowBonus(false);
+    setNewRecord(false);
     setPhase("playing");
   };
 
-  const pairs = getPairsForLevel(level);
-
   const handleFlip = (card: ZooCard) => {
-    if (phase !== "playing" || locked) return;
+    if (phase !== "playing" || locked || paused) return;
     if (openUids.includes(card.uid) || matchedIds.includes(card.animalId)) return;
 
     speak(card.word, "en");
@@ -103,16 +184,10 @@ export default function ZooMemoryPage() {
       setMatchedIds(nextMatched);
       setOpenUids([]);
       setLocked(false);
+      setTimeLeft((s) => Math.min(timeLimit, s + MATCH_BONUS_SECONDS));
+      setShowBonus(true);
+      later(() => setShowBonus(false), BONUS_FLASH_MS);
       playCorrectSound();
-
-      if (nextMatched.length === pairs) {
-        later(() => {
-          setStars(getStars(nextMoves, pairs));
-          setCoinsEarned(addQuizCoins(COINS_PER_LEVEL));
-          setPhase("complete");
-          playVictorySound();
-        }, 700);
-      }
     }, MATCH_DELAY_MS);
   };
 
@@ -134,14 +209,100 @@ export default function ZooMemoryPage() {
         </div>
         <h1 className="font-heading text-3xl font-black text-foreground sm:text-4xl">{t("zoo_title")}</h1>
         <p className="mt-3 text-sm font-semibold text-muted-foreground sm:text-base">{t("zoo_intro")}</p>
+
+        <div className="mt-6 w-full">
+          <p className="mb-2 text-sm font-extrabold text-foreground">{t("zoo_pick_difficulty")}</p>
+          <div className="grid grid-cols-3 gap-2 sm:gap-3" role="radiogroup" aria-label={t("zoo_pick_difficulty")}>
+            {ZOO_DIFFICULTIES.map((d) => {
+              const selected = d === difficulty;
+              return (
+                <button
+                  key={d}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  onClick={() => setDifficulty(d)}
+                  className={cn(
+                    "flex flex-col items-center gap-0.5 rounded-2xl border-2 px-2 py-3 transition-all active:scale-95",
+                    selected
+                      ? "border-primary bg-primary/10 shadow-md"
+                      : "border-border bg-card hover:bg-accent"
+                  )}
+                >
+                  <span className="text-3xl" aria-hidden>
+                    {DIFFICULTY_EMOJI[d]}
+                  </span>
+                  <span className="font-heading text-base font-extrabold text-foreground">
+                    {t(`zoo_diff_${d}`)}
+                  </span>
+                  <span className="text-[11px] font-semibold text-muted-foreground">
+                    {t(`zoo_diff_${d}_desc`)}
+                  </span>
+                  <span className="mt-0.5 text-xs font-bold tabular-nums text-primary">
+                    ⏱ {getTimeLimitForLevel(1, d)} {t("zoo_seconds")}
+                  </span>
+                  {bestLevels[d] > 0 && (
+                    <span className="text-xs font-bold text-amber-600 dark:text-amber-400">
+                      🏆 {t("zoo_level")} {bestLevels[d]}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         <button
           type="button"
           onClick={() => startLevel(1)}
-          className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-primary px-8 py-3.5 text-lg font-extrabold text-primary-foreground shadow-md transition-all hover:bg-primary/90 active:scale-95"
+          className="mt-5 inline-flex items-center justify-center gap-2 rounded-full bg-primary px-8 py-3.5 text-lg font-extrabold text-primary-foreground shadow-md transition-all hover:bg-primary/90 active:scale-95"
         >
           {t("zoo_start")}
         </button>
         <div className="mt-6">{backLink}</div>
+      </div>
+    );
+  }
+
+  if (phase === "timeout") {
+    return (
+      <div className="mx-auto flex w-full max-w-lg flex-1 flex-col items-center justify-center px-4 py-12 text-center">
+        <div className="mb-3 text-6xl" aria-hidden>
+          ⏰
+        </div>
+        <h1 className="font-heading text-3xl font-extrabold text-foreground sm:text-4xl">{t("zoo_time_up")}</h1>
+        <p className="mt-2 text-sm font-bold text-muted-foreground">
+          {t("zoo_level")} {level} · {matchedIds.length} / {pairs} {t("zoo_pairs_found").toLowerCase()}
+        </p>
+        <p className="mt-1 text-sm font-semibold text-muted-foreground">{t("zoo_time_up_hint")}</p>
+
+        <div className="mt-6 flex w-full max-w-xs flex-col gap-3">
+          <button
+            type="button"
+            onClick={() => startLevel(level)}
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 font-extrabold text-primary-foreground shadow-md transition-all hover:bg-primary/90 active:scale-95"
+          >
+            <RotateCcw className="size-4" />
+            {t("zoo_try_again")}
+          </button>
+          {level > 1 && (
+            <button
+              type="button"
+              onClick={() => startLevel(1)}
+              className="text-sm font-bold text-muted-foreground underline-offset-2 hover:underline"
+            >
+              {t("zoo_restart")}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setPhase("intro")}
+            className="text-sm font-bold text-muted-foreground underline-offset-2 hover:underline"
+          >
+            {t("zoo_change_difficulty")}
+          </button>
+          <div className="mt-2 flex justify-center">{backLink}</div>
+        </div>
       </div>
     );
   }
@@ -156,6 +317,11 @@ export default function ZooMemoryPage() {
         <h1 className="font-heading text-3xl font-extrabold text-foreground sm:text-4xl">
           {t("zoo_level_complete")}
         </h1>
+        {newRecord && (
+          <div className="mt-2 inline-flex animate-bounce items-center gap-1.5 rounded-full bg-amber-100 px-4 py-1.5 text-sm font-black text-amber-700 dark:bg-amber-950/50 dark:text-amber-300">
+            🏆 {t("zoo_new_record")}
+          </div>
+        )}
         <p className="mt-1 text-sm font-bold text-muted-foreground">
           {t("zoo_level")} {level} · {pairs * 2} {t("zoo_cards")} · {moves} {t("zoo_moves").toLowerCase()}
         </p>
@@ -206,6 +372,13 @@ export default function ZooMemoryPage() {
               {t("zoo_restart")}
             </button>
           )}
+          <button
+            type="button"
+            onClick={() => setPhase("intro")}
+            className="text-sm font-bold text-muted-foreground underline-offset-2 hover:underline"
+          >
+            {t("zoo_change_difficulty")}
+          </button>
         </div>
       </div>
     );
@@ -213,14 +386,58 @@ export default function ZooMemoryPage() {
 
   const gridClass = GRID_CLASSES[cards.length] ?? GRID_CLASSES[24];
   const progressPercent = Math.round((matchedIds.length / pairs) * 100);
+  const timePercent = Math.round((timeLeft / timeLimit) * 100);
+  const timeLow = timeLeft <= Math.max(5, Math.round(timeLimit * 0.2));
 
   return (
     <div className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">
       <div className="mb-5 flex items-center justify-between gap-3">
         {backLink}
-        <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-extrabold text-primary">
-          {t("zoo_level")} {level}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setPaused(true)}
+            disabled={paused || allMatched}
+            aria-label={t("zoo_pause")}
+            className="inline-flex size-9 items-center justify-center rounded-full border bg-card text-foreground shadow-xs transition-all hover:bg-accent active:scale-95 disabled:opacity-50"
+          >
+            <Pause className="size-4" />
+          </button>
+          <div
+            role="timer"
+            aria-label={`${t("zoo_time_left")}: ${timeLeft} ${t("zoo_seconds")}`}
+            className={cn(
+              "relative inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-extrabold tabular-nums",
+              timeLow ? "animate-pulse bg-red-100 text-red-600 dark:bg-red-950/50 dark:text-red-300" : "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300"
+            )}
+          >
+            <Timer className="size-4" />
+            {timeLeft}
+            {t("zoo_seconds")}
+            {showBonus && (
+              <span
+                aria-hidden
+                className="pointer-events-none absolute -bottom-5 right-2 animate-bounce text-xs font-black text-emerald-600 dark:text-emerald-400"
+              >
+                +{MATCH_BONUS_SECONDS}
+                {t("zoo_seconds")}
+              </span>
+            )}
+          </div>
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-extrabold text-primary">
+            {t("zoo_level")} {level}
+          </div>
         </div>
+      </div>
+
+      <div className="mb-3 h-2 w-full overflow-hidden rounded-full bg-muted">
+        <div
+          className={cn(
+            "h-full transition-all duration-1000 ease-linear",
+            timeLow ? "bg-red-500" : "bg-amber-400"
+          )}
+          style={{ width: `${timePercent}%` }}
+        />
       </div>
 
       <div className="mb-5 w-full">
@@ -240,7 +457,7 @@ export default function ZooMemoryPage() {
         </div>
       </div>
 
-      <Card className="border-none bg-gradient-to-br from-emerald-100 via-lime-50 to-amber-100 p-3 shadow-md sm:p-5 dark:from-emerald-950/50 dark:via-background dark:to-amber-950/30">
+      <Card className="relative border-none bg-gradient-to-br from-emerald-100 via-lime-50 to-amber-100 p-3 shadow-md sm:p-5 dark:from-emerald-950/50 dark:via-background dark:to-amber-950/30">
         <div className={cn("mx-auto grid w-full gap-2 sm:gap-3", gridClass)}>
           {cards.map((card) => {
             const matched = matchedIds.includes(card.animalId);
@@ -286,6 +503,22 @@ export default function ZooMemoryPage() {
             );
           })}
         </div>
+        {paused && (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 rounded-[inherit] bg-card">
+            <div className="text-6xl" aria-hidden>
+              ⏸️
+            </div>
+            <p className="font-heading text-2xl font-extrabold text-foreground">{t("zoo_paused")}</p>
+            <button
+              type="button"
+              onClick={() => setPaused(false)}
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-8 py-3 text-lg font-extrabold text-primary-foreground shadow-md transition-all hover:bg-primary/90 active:scale-95"
+            >
+              <Play className="size-5" />
+              {t("zoo_resume")}
+            </button>
+          </div>
+        )}
       </Card>
     </div>
   );

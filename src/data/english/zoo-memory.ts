@@ -13,6 +13,60 @@ export function getPairsForLevel(level: number): number {
   return PAIRS_BY_LEVEL[Math.min(level, PAIRS_BY_LEVEL.length) - 1];
 }
 
+export type ZooDifficulty = "easy" | "normal" | "hard";
+
+export const ZOO_DIFFICULTIES: ZooDifficulty[] = ["easy", "normal", "hard"];
+
+const TIME_RULES: Record<ZooDifficulty, { secondsPerPair: number; baseSeconds: number }> = {
+  easy: { secondsPerPair: 14, baseSeconds: 14 },
+  normal: { secondsPerPair: 10, baseSeconds: 10 },
+  hard: { secondsPerPair: 7, baseSeconds: 6 },
+};
+
+export function getTimeLimitForLevel(level: number, difficulty: ZooDifficulty): number {
+  const { secondsPerPair, baseSeconds } = TIME_RULES[difficulty];
+  return getPairsForLevel(level) * secondsPerPair + baseSeconds;
+}
+
+export type ZooBestLevels = Record<ZooDifficulty, number>;
+
+export const EMPTY_BEST_LEVELS: ZooBestLevels = { easy: 0, normal: 0, hard: 0 };
+
+const BEST_LEVELS_KEY = "kids_english_zoo_best_v1";
+
+export function loadBestLevels(): ZooBestLevels {
+  try {
+    const saved = JSON.parse(localStorage.getItem(BEST_LEVELS_KEY) ?? "{}");
+    return {
+      easy: Number(saved.easy) || 0,
+      normal: Number(saved.normal) || 0,
+      hard: Number(saved.hard) || 0,
+    };
+  } catch {
+    return EMPTY_BEST_LEVELS;
+  }
+}
+
+export function saveBestLevels(best: ZooBestLevels) {
+  try {
+    localStorage.setItem(BEST_LEVELS_KEY, JSON.stringify(best));
+  } catch {}
+}
+
+const BASE_COINS: Record<ZooDifficulty, number> = {
+  easy: 3,
+  normal: 5,
+  hard: 8,
+};
+
+const FAST_FINISH_BONUS_COINS = 2;
+const FAST_FINISH_TIME_RATIO = 0.5;
+
+export function getCoinReward(difficulty: ZooDifficulty, timeLeft: number, timeLimit: number): number {
+  const fastFinish = timeLeft >= timeLimit * FAST_FINISH_TIME_RATIO;
+  return BASE_COINS[difficulty] + (fastFinish ? FAST_FINISH_BONUS_COINS : 0);
+}
+
 export function getMaxLevel(): number {
   return PAIRS_BY_LEVEL.length;
 }
