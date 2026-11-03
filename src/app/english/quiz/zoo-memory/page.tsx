@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { ArrowLeft, Pause, Play, RotateCcw, Star, Timer } from "lucide-react";
 import {
@@ -28,15 +28,36 @@ import { cn } from "@/lib/utils";
 
 type Phase = "intro" | "playing" | "complete" | "timeout";
 
-const GRID_CLASSES: Record<number, string> = {
-  4: "grid-cols-2 max-w-xs",
-  6: "grid-cols-3 max-w-sm",
-  8: "grid-cols-4 max-w-md",
-  12: "grid-cols-4 max-w-md",
-  16: "grid-cols-4 max-w-lg",
-  20: "grid-cols-4 sm:grid-cols-5 max-w-xl",
-  24: "grid-cols-4 sm:grid-cols-6 max-w-2xl",
+const COLUMNS_NARROW: Record<number, number> = { 4: 2, 6: 3, 8: 4, 12: 4, 16: 4, 20: 4, 24: 4 };
+const COLUMNS_WIDE: Record<number, number> = { 4: 2, 6: 3, 8: 4, 12: 4, 16: 4, 20: 5, 24: 6 };
+
+// Board sizing: cards stay compact and the whole board fits in the viewport,
+// so a timed round never needs scrolling.
+const MAX_CARD_REM = 7;
+const CARD_GAP_REM = 0.5;
+const BOARD_PADDING_REM = 0.5;
+const MIN_BOARD_REM = 16;
+// Viewport height taken by the site header, game header and stats around the board.
+const RESERVED_HEIGHT_NARROW_REM = 26;
+const RESERVED_HEIGHT_WIDE_REM = 19;
+
+const getColumns = (count: number, wide: boolean) =>
+  (wide ? COLUMNS_WIDE : COLUMNS_NARROW)[count] ?? (wide ? 6 : 4);
+
+const WIDE_QUERY = "(min-width: 640px)";
+
+const subscribeWide = (onChange: () => void) => {
+  const query = window.matchMedia(WIDE_QUERY);
+  query.addEventListener("change", onChange);
+  return () => query.removeEventListener("change", onChange);
 };
+
+const useIsWide = () =>
+  useSyncExternalStore(
+    subscribeWide,
+    () => window.matchMedia(WIDE_QUERY).matches,
+    () => false
+  );
 
 const FLIP_BACK_DELAY_MS = 1000;
 const MATCH_DELAY_MS = 500;
@@ -58,6 +79,7 @@ export default function ZooMemoryPage() {
   const { t } = useLanguage();
   const { speak } = useVoice();
   const { addQuizCoins } = useReward();
+  const isWide = useIsWide();
 
   const [phase, setPhase] = useState<Phase>("intro");
   const [level, setLevel] = useState(1);
@@ -384,22 +406,34 @@ export default function ZooMemoryPage() {
     );
   }
 
-  const gridClass = GRID_CLASSES[cards.length] ?? GRID_CLASSES[24];
-  const progressPercent = Math.round((matchedIds.length / pairs) * 100);
+  const columns = getColumns(cards.length, isWide);
+  const rows = Math.ceil(cards.length / columns);
+  const reservedHeight = isWide ? RESERVED_HEIGHT_WIDE_REM : RESERVED_HEIGHT_NARROW_REM;
+  const boardWidth = `min(calc((100dvh - ${reservedHeight}rem) * ${columns} / ${rows}), ${
+    columns * MAX_CARD_REM + (columns - 1) * CARD_GAP_REM
+  }rem)`;
+  const boardCardWidth = `min(100%, max(${MIN_BOARD_REM}rem, calc(${boardWidth} + ${2 * BOARD_PADDING_REM}rem)))`;
   const timePercent = Math.round((timeLeft / timeLimit) * 100);
   const timeLow = timeLeft <= Math.max(5, Math.round(timeLimit * 0.2));
 
   return (
-    <div className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">
-      <div className="mb-5 flex items-center justify-between gap-3">
-        {backLink}
-        <div className="flex items-center gap-2">
+    <div className="mx-auto w-full max-w-3xl flex-1 px-3 py-3 sm:px-4 sm:py-4">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <Link
+          href="/english/quiz"
+          aria-label={t("quiz_back_to_modes")}
+          className="inline-flex items-center gap-1.5 rounded-full border bg-card px-3 py-1.5 text-sm font-extrabold text-foreground shadow-xs transition-all hover:bg-accent active:scale-95"
+        >
+          <ArrowLeft className="size-4 text-primary" />
+          <span className="hidden sm:inline">{t("quiz_back_to_modes")}</span>
+        </Link>
+        <div className="flex items-center gap-1.5">
           <button
             type="button"
             onClick={() => setPaused(true)}
             disabled={paused || allMatched}
             aria-label={t("zoo_pause")}
-            className="inline-flex size-9 items-center justify-center rounded-full border bg-card text-foreground shadow-xs transition-all hover:bg-accent active:scale-95 disabled:opacity-50"
+            className="inline-flex size-8 items-center justify-center rounded-full border bg-card text-foreground shadow-xs transition-all hover:bg-accent active:scale-95 disabled:opacity-50"
           >
             <Pause className="size-4" />
           </button>
@@ -407,7 +441,7 @@ export default function ZooMemoryPage() {
             role="timer"
             aria-label={`${t("zoo_time_left")}: ${timeLeft} ${t("zoo_seconds")}`}
             className={cn(
-              "relative inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-extrabold tabular-nums",
+              "relative inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-extrabold tabular-nums",
               timeLow ? "animate-pulse bg-red-100 text-red-600 dark:bg-red-950/50 dark:text-red-300" : "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300"
             )}
           >
@@ -424,13 +458,13 @@ export default function ZooMemoryPage() {
               </span>
             )}
           </div>
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-extrabold text-primary">
+          <div className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm font-extrabold text-primary">
             {t("zoo_level")} {level}
           </div>
         </div>
       </div>
 
-      <div className="mb-3 h-2 w-full overflow-hidden rounded-full bg-muted">
+      <div className="mb-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
         <div
           className={cn(
             "h-full transition-all duration-1000 ease-linear",
@@ -440,25 +474,26 @@ export default function ZooMemoryPage() {
         />
       </div>
 
-      <div className="mb-5 w-full">
-        <div className="mb-1 flex justify-between text-xs font-bold text-muted-foreground">
-          <span>
-            {t("zoo_pairs_found")}: {matchedIds.length} / {pairs}
-          </span>
-          <span>
-            {t("zoo_moves")}: {moves}
-          </span>
-        </div>
-        <div className="h-3 w-full overflow-hidden rounded-full bg-muted">
-          <div
-            className="h-full bg-primary transition-all duration-300 ease-out"
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
+      <div className="mb-3 flex justify-between text-xs font-bold text-muted-foreground">
+        <span>
+          🐾 {t("zoo_pairs_found")}: {matchedIds.length} / {pairs}
+        </span>
+        <span>
+          {t("zoo_moves")}: {moves}
+        </span>
       </div>
 
-      <Card className="relative border-none bg-gradient-to-br from-emerald-100 via-lime-50 to-amber-100 p-3 shadow-md sm:p-5 dark:from-emerald-950/50 dark:via-background dark:to-amber-950/30">
-        <div className={cn("mx-auto grid w-full gap-2 sm:gap-3", gridClass)}>
+      <Card
+        className="relative mx-auto border-none bg-gradient-to-br from-emerald-100 via-lime-50 to-amber-100 shadow-md dark:from-emerald-950/50 dark:via-background dark:to-amber-950/30"
+        style={{ width: boardCardWidth, padding: `${BOARD_PADDING_REM}rem` }}
+      >
+        <div
+          className="grid w-full"
+          style={{
+            gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
+            gap: `${CARD_GAP_REM}rem`,
+          }}
+        >
           {cards.map((card) => {
             const matched = matchedIds.includes(card.animalId);
             const flipped = matched || openUids.includes(card.uid);
@@ -469,7 +504,7 @@ export default function ZooMemoryPage() {
                 onClick={() => handleFlip(card)}
                 aria-label={flipped ? card.word : "?"}
                 aria-pressed={flipped}
-                className="relative aspect-square w-full cursor-pointer select-none active:scale-95 [perspective:800px]"
+                className="relative aspect-square w-full cursor-pointer select-none [container-type:inline-size] active:scale-95 [perspective:800px]"
               >
                 <div
                   className="absolute inset-0 transition-transform duration-500"
@@ -480,21 +515,21 @@ export default function ZooMemoryPage() {
                 >
                   <div
                     style={faceStyle}
-                    className="absolute inset-0 flex items-center justify-center rounded-2xl border-2 border-emerald-600 bg-gradient-to-br from-emerald-400 to-teal-500 text-3xl shadow-md sm:text-5xl"
+                    className="absolute inset-0 flex items-center justify-center rounded-xl border-2 border-emerald-600 bg-gradient-to-br from-emerald-400 to-teal-500 text-[38cqw] leading-none shadow-sm"
                   >
                     🐾
                   </div>
                   <div
                     style={{ ...faceStyle, transform: "rotateY(180deg)" }}
                     className={cn(
-                      "absolute inset-0 flex flex-col items-center justify-center gap-0.5 rounded-2xl border-2 bg-card shadow-md",
-                      matched ? "border-emerald-500 bg-emerald-50 ring-4 ring-emerald-400/40 dark:bg-emerald-950/40" : "border-amber-300"
+                      "absolute inset-0 flex flex-col items-center justify-center gap-[3cqw] rounded-xl border-2 bg-card shadow-sm",
+                      matched ? "border-emerald-500 bg-emerald-50 ring-2 ring-emerald-400/50 dark:bg-emerald-950/40" : "border-amber-300"
                     )}
                   >
-                    <span className="text-3xl sm:text-5xl" aria-hidden>
+                    <span className="text-[40cqw] leading-none" aria-hidden>
                       {card.emoji}
                     </span>
-                    <span className="font-heading text-[10px] font-extrabold text-foreground sm:text-sm">
+                    <span className="font-heading text-[clamp(9px,14cqw,15px)] font-extrabold leading-none text-foreground">
                       {card.word}
                     </span>
                   </div>
@@ -504,15 +539,15 @@ export default function ZooMemoryPage() {
           })}
         </div>
         {paused && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 rounded-[inherit] bg-card">
-            <div className="text-6xl" aria-hidden>
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 rounded-[inherit] bg-card">
+            <div className="text-5xl" aria-hidden>
               ⏸️
             </div>
-            <p className="font-heading text-2xl font-extrabold text-foreground">{t("zoo_paused")}</p>
+            <p className="font-heading text-xl font-extrabold text-foreground">{t("zoo_paused")}</p>
             <button
               type="button"
               onClick={() => setPaused(false)}
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-8 py-3 text-lg font-extrabold text-primary-foreground shadow-md transition-all hover:bg-primary/90 active:scale-95"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-2.5 text-base font-extrabold text-primary-foreground shadow-md transition-all hover:bg-primary/90 active:scale-95"
             >
               <Play className="size-5" />
               {t("zoo_resume")}
