@@ -25,48 +25,42 @@ export default function GiftsPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
-      {/* Back button */}
-      <Link
-        href="/"
-        className="inline-flex items-center gap-2 rounded-full border bg-card px-4 py-2 text-sm font-extrabold text-foreground shadow-xs transition-all hover:bg-accent hover:shadow-md active:scale-95 mb-6"
-      >
-        <ArrowLeft className="size-5 text-primary" />
-        <span>{t("nav_home")}</span>
-      </Link>
-
+    <div className="mx-auto w-full max-w-5xl flex-1 px-4 py-4 sm:py-6">
       {/* Page Header */}
-      <div className="relative mb-8 overflow-hidden rounded-3xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600 p-6 text-white shadow-lg sm:p-8">
-        <div className="relative z-10 text-center flex flex-col items-center">
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-1.5 text-xs font-black uppercase tracking-wider backdrop-blur-md">
-            <Gift className="size-4" />
-            <span>{t("gifts_title")}</span>
+      <div className="mb-4 flex flex-col gap-3 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600 p-4 text-white shadow-md sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <Link
+            href="/"
+            aria-label={t("nav_home")}
+            className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all hover:bg-white/30 active:scale-95"
+          >
+            <ArrowLeft className="size-5" />
+          </Link>
+          <div>
+            <h1 className="flex items-center gap-2 font-heading text-xl font-black sm:text-2xl">
+              <Gift className="size-5" />
+              {t("gifts_title")}
+            </h1>
+            <p className="text-xs font-semibold text-white/90">{t("gifts_subtitle")}</p>
           </div>
+        </div>
 
-          <h1 className="mt-3 font-heading text-2xl font-black sm:text-4xl">
-            {t("gifts_title")}
-          </h1>
-          <p className="mt-1 max-w-lg text-xs font-semibold text-white/90 sm:text-sm">
-            {t("gifts_subtitle")}
-          </p>
-
-          {/* Savings Coin Card */}
-          <div className="mt-5 inline-flex items-center gap-3 rounded-full bg-white/95 px-6 py-2.5 text-foreground shadow-md backdrop-blur-md dark:bg-slate-900/90 dark:text-white">
-            <GoldCoin className="size-7 sm:size-9 animate-bounce" />
-            <div className="text-left">
-              <span className="block text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                {t("gifts_my_balance")}
-              </span>
-              <span className="font-heading text-xl sm:text-2xl font-black text-amber-500">
-                {coins} <span className="text-sm font-extrabold text-foreground/80">{t("gifts_dong")}</span>
-              </span>
-            </div>
+        {/* Savings Coin */}
+        <div className="inline-flex items-center gap-2 self-start rounded-full bg-white/95 px-4 py-1.5 text-foreground shadow-md dark:bg-slate-900/90 dark:text-white sm:self-auto">
+          <GoldCoin className="size-6" />
+          <div className="text-left leading-tight">
+            <span className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              {t("gifts_my_balance")}
+            </span>
+            <span className="font-heading text-lg font-black text-amber-500">
+              {coins} <span className="text-xs font-extrabold text-foreground/80">{t("gifts_dong")}</span>
+            </span>
           </div>
         </div>
       </div>
 
       {/* Toy Gifts Grid */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {giftItems.map((gift) => {
           const effectivePrice = getGiftEffectivePrice(gift.id, gift.price);
           const isRedeemed = redeemedGifts.includes(gift.id);
@@ -78,57 +72,69 @@ export default function GiftsPage() {
             <Card
               key={gift.id}
               className={cn(
-                "relative flex flex-col overflow-hidden border-2 transition-all duration-200 rounded-3xl",
+                "relative flex-row gap-3 rounded-2xl border-2 p-3 transition-all duration-200",
                 isRedeemed
-                  ? "border-emerald-500/40 bg-emerald-50/50 dark:bg-emerald-950/20 shadow-xs"
+                  ? "border-emerald-500/40 bg-emerald-50/50 shadow-xs dark:bg-emerald-950/20"
                   : canAfford
-                  ? "border-amber-400 bg-card shadow-md hover:-translate-y-1 hover:shadow-xl ring-2 ring-amber-400/30"
+                  ? "border-amber-400 bg-card shadow-md ring-2 ring-amber-400/30 hover:-translate-y-0.5 hover:shadow-lg"
                   : "border-border/60 bg-card/60 opacity-90"
               )}
             >
-              {/* Card Banner Header */}
               <div
-                className={`flex h-32 items-center justify-center bg-gradient-to-br ${gift.gradient} relative p-4 text-center`}
+                className={`relative flex size-20 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${gift.gradient}`}
               >
-                <span className="text-6xl transition-transform duration-200 hover:scale-110 drop-shadow-md" aria-hidden>
+                <span className="text-4xl drop-shadow-md" aria-hidden>
                   {gift.emoji}
                 </span>
-
-                {/* Price Badge */}
-                <div className="absolute top-3 right-3 rounded-full bg-black/40 px-3 py-1 text-xs font-black text-amber-300 backdrop-blur-md flex items-center gap-1.5">
-                  <GoldCoin className="size-4" />
-                  <span>{effectivePrice} {t("gifts_dong")}</span>
-                </div>
-
                 {isRedeemed && (
-                  <div className="absolute top-3 left-3 rounded-full bg-emerald-500 text-white px-2.5 py-1 text-xs font-extrabold flex items-center gap-1 shadow-xs">
-                    <CheckCircle2 className="size-3.5" />
-                    <span>{t("gifts_claimed")}</span>
-                  </div>
+                  <span className="absolute -top-1.5 -left-1.5 flex size-6 items-center justify-center rounded-full bg-emerald-500 text-white shadow-xs">
+                    <CheckCircle2 className="size-4" />
+                  </span>
                 )}
               </div>
 
-              {/* Card Body */}
-              <CardContent className="flex flex-1 flex-col justify-between p-5">
+              <CardContent className="flex min-w-0 flex-1 flex-col justify-between gap-1.5 p-0">
                 <div>
-                  <h3 className="font-heading text-lg font-black text-foreground">
-                    {language === "vi" ? gift.nameVi : gift.nameEn}
-                  </h3>
-                  <p className="mt-1 text-xs font-semibold text-muted-foreground leading-relaxed">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-heading text-sm font-black leading-tight text-foreground">
+                      {language === "vi" ? gift.nameVi : gift.nameEn}
+                    </h3>
+                    <span className="flex shrink-0 items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-black text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">
+                      <GoldCoin className="size-3.5" />
+                      {effectivePrice}
+                    </span>
+                  </div>
+                  <p className="mt-0.5 line-clamp-2 text-[11px] font-semibold leading-snug text-muted-foreground">
                     {language === "vi" ? gift.descriptionVi : gift.descriptionEn}
                   </p>
                 </div>
 
-                {/* Progress bar if not enough coins */}
-                {!isRedeemed && !canAfford && (
-                  <div className="mt-4 flex flex-col gap-1.5">
+                {isRedeemed ? (
+                  <Button
+                    disabled
+                    className="h-8 w-full rounded-xl bg-emerald-500/20 text-xs font-extrabold text-emerald-700 dark:text-emerald-300"
+                  >
+                    <CheckCircle2 className="mr-1 size-3.5 text-emerald-600" />
+                    <span>{t("gifts_claimed")}</span>
+                  </Button>
+                ) : canAfford ? (
+                  <Button
+                    onClick={() => handleRedeem(gift)}
+                    className="h-8 w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-xs font-black text-white shadow-md transition-all hover:from-amber-600 hover:to-orange-600 active:scale-95"
+                  >
+                    <Gift className="mr-1.5 size-3.5 animate-bounce" />
+                    <span>{t("gifts_redeem_btn")}</span>
+                  </Button>
+                ) : (
+                  <div className="flex flex-col gap-1">
                     <div className="flex justify-between text-[11px] font-bold text-muted-foreground">
-                      <span>
-                        {t("gifts_need_more")} <strong className="text-amber-600">{remaining} {t("gifts_dong")}</strong>
+                      <span className="flex items-center gap-1">
+                        <Lock className="size-3 text-muted-foreground/70" />
+                        {t("gifts_need_more")} <strong className="text-amber-600">{remaining}</strong>
                       </span>
                       <span>{progressPercent}%</span>
                     </div>
-                    <div className="h-2.5 w-full overflow-hidden rounded-full bg-muted">
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                       <div
                         className="h-full bg-gradient-to-r from-amber-400 to-orange-500 transition-all duration-300"
                         style={{ width: `${progressPercent}%` }}
@@ -136,38 +142,6 @@ export default function GiftsPage() {
                     </div>
                   </div>
                 )}
-
-                {/* Action Button */}
-                <div className="mt-5">
-                  {isRedeemed ? (
-                    <Button
-                      disabled
-                      className="w-full rounded-2xl bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-extrabold"
-                    >
-                      <CheckCircle2 className="size-4 mr-1.5 text-emerald-600" />
-                      <span>{t("gifts_claimed")}</span>
-                    </Button>
-                  ) : canAfford ? (
-                    <Button
-                      onClick={() => handleRedeem(gift)}
-                      className="w-full rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black shadow-md hover:shadow-lg active:scale-95 transition-all text-sm py-5"
-                    >
-                      <Gift className="size-4 mr-2 animate-bounce" />
-                      <span>{t("gifts_redeem_btn")}</span>
-                    </Button>
-                  ) : (
-                    <Button
-                      disabled
-                      variant="outline"
-                      className="w-full rounded-2xl border-dashed font-extrabold text-muted-foreground text-xs py-5"
-                    >
-                      <Lock className="size-3.5 mr-1.5 text-muted-foreground/70" />
-                      <span>
-                        {t("gifts_need_more")} {remaining} {t("gifts_dong")}
-                      </span>
-                    </Button>
-                  )}
-                </div>
               </CardContent>
             </Card>
           );

@@ -7,7 +7,7 @@ import { SiteFooter } from "@/components/home/site-footer";
 export default function Home() {
   return (
     <div className="flex flex-1 flex-col bg-[#FFFDF9]">
-      <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-6 lg:py-8 space-y-12 w-full">
+      <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-4 lg:py-6 space-y-4 w-full">
         <HeroSection />
         <CoreSubjectsSection />
         <FeatureBannersSection />

@@ -7,7 +7,7 @@ export function SiteFooter() {
   const { t } = useLanguage();
 
   return (
-    <footer className="bg-amber-50/70 border-t border-amber-200/60 mt-12 py-8 px-4 sm:px-6 lg:px-10">
+    <footer className="bg-amber-50/70 border-t border-amber-200/60 mt-4 py-6 px-4 sm:px-6 lg:px-10">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Top Badges / Guarantees */}
         <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-bold text-gray-600">

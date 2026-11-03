@@ -1,9 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ShieldCheck } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
-import { Card } from "@/components/ui/card";
 import { ParentPinModal } from "@/components/parent-pin-modal";
 import { ParentControlModal } from "@/components/parent-control-modal";
 
@@ -13,30 +11,26 @@ export function ParentCornerSection() {
   const [showParentModal, setShowParentModal] = useState(false);
 
   return (
-    <section id="parents" className="pt-2 pb-10">
-      <div className="bg-white border-2 border-orange-100/90 rounded-[28px] p-6 sm:p-7 flex flex-col lg:flex-row lg:items-center justify-between gap-6 shadow-sm">
-        <div className="flex items-start sm:items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-orange-50 border border-orange-200 flex-shrink-0 flex items-center justify-center text-2xl text-[#E64A19]">
+    <section id="parents" className="pt-1 pb-4">
+      <div className="flex flex-col justify-between gap-3 rounded-2xl border-2 border-orange-100/90 bg-white p-4 shadow-sm sm:flex-row sm:items-center">
+        <div className="flex items-center gap-3">
+          <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-orange-200 bg-orange-50 text-xl text-[#E64A19]">
             🛡️
           </div>
           <div>
-            <h3 className="text-lg sm:text-xl font-extrabold text-gray-900">
-              {t("parent_corner_title")}
-            </h3>
-            <p className="text-sm font-medium text-gray-500 mt-0.5 max-w-xl leading-relaxed">
+            <h3 className="text-base font-extrabold text-gray-900 sm:text-lg">{t("parent_corner_title")}</h3>
+            <p className="mt-0.5 max-w-xl text-xs font-medium leading-relaxed text-gray-500 sm:text-sm">
               {t("parent_corner_desc")}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => setShowPinModal(true)}
-            className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-[#FF5722] hover:bg-orange-600 text-white font-extrabold text-sm shadow-md shadow-orange-500/20 active:scale-95 transition-all whitespace-nowrap"
-          >
-            {t("parent_corner_cta")} ⚙️
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => setShowPinModal(true)}
+          className="w-full whitespace-nowrap rounded-xl bg-[#FF5722] px-5 py-2.5 text-sm font-extrabold text-white shadow-md shadow-orange-500/20 transition-all hover:bg-orange-600 active:scale-95 sm:w-auto"
+        >
+          {t("parent_corner_cta")} ⚙️
+        </button>
       </div>
 
       <ParentPinModal open={showPinModal} onOpenChange={setShowPinModal} onSuccess={() => setShowParentModal(true)} />

@@ -37,19 +37,19 @@ export function HeroSection() {
   const selectedGroup = AGE_GROUPS.find((g) => g.id === ageGroup);
 
   return (
-    <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center pt-2 pb-6">
+    <section className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center pt-1 pb-2">
       {/* Left Description */}
-      <div className="lg:col-span-7 space-y-5 text-left">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100/70 border border-amber-200 text-[#D84315] font-extrabold text-xs tracking-wide">
+      <div className="lg:col-span-7 space-y-3 text-left">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100/70 border border-amber-200 text-[#D84315] font-extrabold text-xs tracking-wide">
           <span>✨</span>
           <span>{t("home_learn_and_laugh_badge")}</span>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 leading-tight">
           {t("home_welcome_prefix")} <span className="text-[#E64A19]">{t("app_name")}</span> 🚀
         </h1>
 
-        <p className="text-base sm:text-lg font-medium text-gray-600 max-w-2xl leading-relaxed">
+        <p className="text-sm sm:text-base font-medium text-gray-600 max-w-2xl leading-relaxed">
           Nền tảng học tập tương tác cho bé từ <strong className="text-gray-900 font-bold">Tiền tiểu học</strong> trở lên — Tự tin học bảng chữ cái, đánh vần ghép chữ, tập đếm & từ vựng mỗi ngày!
         </p>
 
@@ -66,7 +66,7 @@ export function HeroSection() {
                     type="button"
                     onClick={() => handleAgeGroupChange(group.id)}
                     className={cn(
-                      "px-5 py-2.5 rounded-2xl font-extrabold text-sm transition-all shadow-md active:scale-95",
+                      "px-4 py-2 rounded-xl font-extrabold text-sm transition-all shadow-md active:scale-95",
                       isSelected
                         ? "bg-[#E64A19] text-white shadow-orange-500/25"
                         : "bg-white border-2 border-amber-200 text-gray-700 hover:border-amber-400"
@@ -81,7 +81,7 @@ export function HeroSection() {
                   key={group.id}
                   type="button"
                   onClick={() => handleAgeGroupChange(group.id)}
-                  className="px-4 py-2.5 rounded-2xl bg-white border-2 border-dashed border-amber-200 text-gray-500 font-bold text-sm hover:border-amber-400 transition-colors flex items-center gap-1.5"
+                  className="px-4 py-2 rounded-xl bg-white border-2 border-dashed border-amber-200 text-gray-500 font-bold text-sm hover:border-amber-400 transition-colors flex items-center gap-1.5"
                 >
                   <span>{t(group.labelKey)}</span>
                 </button>
@@ -99,19 +99,19 @@ export function HeroSection() {
 
       {/* Right Mascot Companion Card */}
       <div className="lg:col-span-5 flex flex-col gap-4">
-        <div className="clay-card bg-gradient-to-br from-[#FFE8D6] via-[#FFF3E0] to-[#FFE0B2] p-8 rounded-[36px] border-2 border-orange-200/60 relative overflow-hidden text-center flex flex-col items-center">
+        <div className="clay-card bg-gradient-to-br from-[#FFE8D6] via-[#FFF3E0] to-[#FFE0B2] p-4 rounded-3xl border-2 border-orange-200/60 relative overflow-hidden flex flex-row items-center gap-3 text-left lg:flex-col lg:gap-0 lg:text-center">
           <div className="absolute -right-8 -top-8 w-32 h-32 bg-amber-300/30 rounded-full blur-2xl"></div>
           <div className="absolute -left-8 -bottom-8 w-32 h-32 bg-orange-300/30 rounded-full blur-2xl"></div>
-          <div className="relative mb-3">
-            <div className="w-36 h-36 rounded-full bg-white/90 shadow-xl shadow-amber-900/10 flex items-center justify-center text-7xl p-2 border-4 border-white transform hover:scale-105 transition-transform duration-300" aria-hidden>
+          <div className="relative shrink-0 lg:mb-2">
+            <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-white/90 shadow-lg shadow-amber-900/10 flex items-center justify-center text-4xl lg:text-5xl p-1 border-4 border-white transform hover:scale-105 transition-transform duration-300" aria-hidden>
               🦁
             </div>
-            <span className="absolute bottom-1 right-2 text-2xl animate-bounce">👋</span>
+            <span className="absolute bottom-0 right-0 text-xl animate-bounce">👋</span>
           </div>
-          <div className="bg-white/90 backdrop-blur-sm border border-orange-200 px-6 py-2.5 rounded-full shadow-md text-amber-950 font-extrabold text-base mb-1">
+          <div className="bg-white/90 backdrop-blur-sm border border-orange-200 px-4 py-1.5 rounded-full shadow-md text-amber-950 font-extrabold text-sm mb-1">
             {t("home_mascot_speech")}
           </div>
-          <p className="text-xs text-amber-900/70 font-semibold max-w-xs mt-2">
+          <p className="hidden lg:block text-xs text-amber-900/70 font-semibold max-w-xs mt-1">
             Cùng bạn Sư Tử Bibi khám phá kho chữ cái và bảng đố vui hấp dẫn hôm nay nhé!
           </p>
         </div>

@@ -1,15 +1,14 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Link from "next/link";
-import { ArrowRight, Lock } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
 import { useReward } from "@/lib/reward-context";
 import { getSubject } from "@/data/subjects";
 import { alphabet } from "@/data/english/alphabet";
 import { vocabularyTopics } from "@/data/english/vocabulary";
 import { qnaCategories } from "@/data/english/qna";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 const englishSubject = getSubject("english")!;
@@ -28,6 +27,68 @@ function countRewardedEnglishItems(rewardedItemIds: string[]): number {
   ).length;
 }
 
+interface SubjectCardProps {
+  emoji: string;
+  title: string;
+  description: string;
+  href: string;
+  ctaLabel: string;
+  borderClass: string;
+  tileClass: string;
+  ctaClass: string;
+  badge: ReactNode;
+  info: ReactNode;
+}
+
+function SubjectCard({
+  emoji,
+  title,
+  description,
+  href,
+  ctaLabel,
+  borderClass,
+  tileClass,
+  ctaClass,
+  badge,
+  info,
+}: SubjectCardProps) {
+  return (
+    <div className={cn("clay-card group flex flex-col gap-3 rounded-2xl! border-2 bg-white p-4", borderClass)}>
+      <div className="flex items-center gap-3">
+        <div
+          className={cn(
+            "flex size-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-b text-3xl transition-transform duration-300 group-hover:scale-105",
+            tileClass
+          )}
+          aria-hidden
+        >
+          {emoji}
+        </div>
+        <div className="min-w-0 flex-1">
+          <h3 className="text-lg font-extrabold leading-tight text-gray-900">{title}</h3>
+          <p className="mt-0.5 line-clamp-2 text-xs font-medium text-gray-500">{description}</p>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+        {badge}
+        {info}
+      </div>
+
+      <Link
+        href={href}
+        className={cn(
+          "mt-auto flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-extrabold text-white shadow-md transition-all active:scale-95",
+          ctaClass
+        )}
+      >
+        <span>{ctaLabel}</span>
+        <ArrowRight className="size-4" />
+      </Link>
+    </div>
+  );
+}
+
 export function CoreSubjectsSection() {
   const { t } = useLanguage();
   const { rewardedItemIds } = useReward();
@@ -35,162 +96,106 @@ export function CoreSubjectsSection() {
   const englishDone = countRewardedEnglishItems(rewardedItemIds);
   const englishPercent = Math.min(100, Math.round((englishDone / TOTAL_ENGLISH_ITEMS) * 100));
 
+  const readyBadge = (className: string) => (
+    <span className={cn("rounded-full border px-2 py-0.5 text-[11px] font-bold", className)}>
+      {t("core_ready_to_start")}
+    </span>
+  );
+
   return (
-    <section id="core-subjects" className="space-y-6 pt-4 pb-8">
-      {/* Section Title Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-2 border-b border-amber-100 pb-4">
+    <section id="core-subjects" className="space-y-4 pt-2 pb-4">
+      <div className="flex flex-col justify-between gap-1 border-b border-amber-100 pb-3 md:flex-row md:items-end">
         <div>
           <span className="text-xs font-black uppercase tracking-wider text-[#FF5722]">{t("core_subjects_eyebrow")}</span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight mt-1">
+          <h2 className="mt-0.5 text-xl font-extrabold tracking-tight text-gray-900 sm:text-2xl">
             {t("core_subjects_title")}
           </h2>
         </div>
-        <p className="text-sm font-bold text-gray-500 flex items-center gap-1.5">
+        <p className="flex items-center gap-1.5 text-xs font-bold text-gray-500 sm:text-sm">
           <span>{t("core_subjects_hint")}</span>
           <span className="text-[#FF5722]">✨</span>
         </p>
       </div>
 
-      {/* Grid of 4 Subjects */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Subject 1: Tiếng Việt (Active & Ready) */}
-        <div className="clay-card bg-white border-2 border-orange-100 p-5 flex flex-col justify-between rounded-3xl group">
-          <div className="space-y-4">
-            <div className="h-32 bg-gradient-to-b from-rose-50 to-orange-100/60 rounded-2xl flex items-center justify-center text-5xl group-hover:scale-105 transition-transform duration-300">
-              {vietnameseSubject.emoji}
-            </div>
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <h3 className="text-xl font-extrabold text-gray-900">{t(vietnameseSubject.labelKey)}</h3>
-                <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
-                  {t("core_ready_to_start")}
-                </span>
-              </div>
-              <p className="text-xs font-medium text-gray-500 line-clamp-2">
-                {t(vietnameseSubject.descKey)}
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-1.5 pt-1">
-              <span className="text-[11px] font-bold px-2 py-0.5 bg-orange-50 text-[#E64A19] rounded-md border border-orange-100">
-                Lộ trình 4 giai đoạn vào lớp 1
-              </span>
-            </div>
-          </div>
-          <div className="pt-5 mt-4 border-t border-gray-100">
-            <Link
-              href={vietnameseSubject.href}
-              className="w-full py-3 px-4 rounded-xl bg-[#FF5722] hover:bg-orange-600 text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-md shadow-orange-500/20 active:scale-95 transition-all"
-            >
-              <span>Học Tiếng Việt</span>
-              <ArrowRight className="size-4" />
-            </Link>
-          </div>
-        </div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <SubjectCard
+          emoji={vietnameseSubject.emoji}
+          title={t(vietnameseSubject.labelKey)}
+          description={t(vietnameseSubject.descKey)}
+          href={vietnameseSubject.href}
+          ctaLabel="Học Tiếng Việt"
+          borderClass="border-orange-100"
+          tileClass="from-rose-50 to-orange-100/60"
+          ctaClass="bg-[#FF5722] shadow-orange-500/20 hover:bg-orange-600"
+          badge={readyBadge("border-emerald-200 bg-emerald-50 text-emerald-600")}
+          info={
+            <span className="inline-block rounded-md border border-orange-100 bg-orange-50 px-2 py-0.5 text-[11px] font-bold text-[#E64A19]">
+              Lộ trình 4 giai đoạn vào lớp 1
+            </span>
+          }
+        />
 
-        {/* Subject 2: Toán Học (Active & Ready) */}
-        <div className="clay-card bg-white border-2 border-emerald-100 p-5 flex flex-col justify-between rounded-3xl group">
-          <div className="space-y-4">
-            <div className="h-32 bg-gradient-to-b from-emerald-50 to-teal-100/60 rounded-2xl flex items-center justify-center text-5xl group-hover:scale-105 transition-transform duration-300">
-              {mathSubject.emoji}
-            </div>
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <h3 className="text-xl font-extrabold text-gray-900">{t(mathSubject.labelKey)}</h3>
-                <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
-                  {t("core_ready_to_start")}
-                </span>
-              </div>
-              <p className="text-xs font-medium text-gray-500 line-clamp-2">
-                {t(mathSubject.descKey)}
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-1.5 pt-1">
-              <span className="text-[11px] font-bold px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-md border border-emerald-200">
-                Số đếm · So sánh · Tách gộp · Cộng trừ
-              </span>
-            </div>
-          </div>
-          <div className="pt-5 mt-4 border-t border-gray-100">
-            <Link
-              href={mathSubject.href}
-              className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-md shadow-emerald-500/20 active:scale-95 transition-all"
-            >
-              <span>Học Toán Ngay</span>
-              <ArrowRight className="size-4" />
-            </Link>
-          </div>
-        </div>
+        <SubjectCard
+          emoji={mathSubject.emoji}
+          title={t(mathSubject.labelKey)}
+          description={t(mathSubject.descKey)}
+          href={mathSubject.href}
+          ctaLabel="Học Toán Ngay"
+          borderClass="border-emerald-100"
+          tileClass="from-emerald-50 to-teal-100/60"
+          ctaClass="bg-emerald-600 shadow-emerald-500/20 hover:bg-emerald-700"
+          badge={readyBadge("border-emerald-200 bg-emerald-50 text-emerald-600")}
+          info={
+            <span className="inline-block rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700">
+              Số đếm · So sánh · Tách gộp · Cộng trừ
+            </span>
+          }
+        />
 
-        {/* Subject 3: Tiếng Anh (Active with Progress) */}
-        <div className="clay-card bg-white border-2 border-blue-100 p-5 flex flex-col justify-between rounded-3xl group">
-          <div className="space-y-4">
-            <div className="h-32 bg-gradient-to-b from-sky-50 to-blue-100/70 rounded-2xl flex items-center justify-center text-5xl group-hover:scale-105 transition-transform duration-300">
-              {englishSubject.emoji}
-            </div>
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <h3 className="text-xl font-extrabold text-gray-900">{t(englishSubject.labelKey)}</h3>
-                <span className="text-[11px] font-bold text-sky-600 bg-sky-50 border border-sky-200 px-2 py-0.5 rounded-full">
-                  {englishDone}/{TOTAL_ENGLISH_ITEMS}
-                </span>
-              </div>
-              <p className="text-xs font-medium text-gray-500 line-clamp-2">
-                {t(englishSubject.descKey)}
-              </p>
-            </div>
-            <div className="space-y-1.5 pt-1">
+        <SubjectCard
+          emoji={englishSubject.emoji}
+          title={t(englishSubject.labelKey)}
+          description={t(englishSubject.descKey)}
+          href={englishSubject.href}
+          ctaLabel="Vào Học Tiếng Anh"
+          borderClass="border-blue-100"
+          tileClass="from-sky-50 to-blue-100/70"
+          ctaClass="bg-[#29B6F6] shadow-sky-400/20 hover:bg-[#0288D1]"
+          badge={
+            <span className="rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 text-[11px] font-bold text-sky-600">
+              {englishDone}/{TOTAL_ENGLISH_ITEMS}
+            </span>
+          }
+          info={
+            <div className="w-full space-y-1">
               <div className="flex justify-between text-[11px] font-bold text-gray-500">
                 <span>{t("core_progress_prefix")}</span>
-                <span className="text-sky-600 font-extrabold">{englishPercent}%</span>
+                <span className="font-extrabold text-sky-600">{englishPercent}%</span>
               </div>
-              <div className="w-full bg-sky-100 h-2 rounded-full overflow-hidden">
-                <div className="bg-sky-500 h-full rounded-full transition-all" style={{ width: `${englishPercent}%` }} />
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-sky-100">
+                <div className="h-full rounded-full bg-sky-500 transition-all" style={{ width: `${englishPercent}%` }} />
               </div>
             </div>
-          </div>
-          <div className="pt-5 mt-4 border-t border-gray-100">
-            <Link
-              href={englishSubject.href}
-              className="w-full py-3 px-4 rounded-xl bg-[#29B6F6] hover:bg-[#0288D1] text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-md shadow-sky-400/20 active:scale-95 transition-all"
-            >
-              <span>Vào Học Tiếng Anh</span>
-              <ArrowRight className="size-4" />
-            </Link>
-          </div>
-        </div>
+          }
+        />
 
-        {/* Subject 4: Vẽ & Sáng Tạo (Ready to start) */}
-        <div className="clay-card bg-white border-2 border-purple-100 p-5 flex flex-col justify-between rounded-3xl group">
-          <div className="space-y-4">
-            <div className="h-32 bg-gradient-to-b from-purple-50 to-purple-100/60 rounded-2xl flex items-center justify-center text-5xl group-hover:scale-105 transition-transform duration-300">
-              {artSubject.emoji}
-            </div>
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <h3 className="text-xl font-extrabold text-gray-900">{t(artSubject.labelKey)}</h3>
-                <span className="text-[11px] font-bold text-purple-600 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded-full">
-                  {t("core_ready_to_start")}
-                </span>
-              </div>
-              <p className="text-xs font-medium text-gray-500 line-clamp-2">
-                {t(artSubject.descKey)}
-              </p>
-            </div>
-            <div className="bg-purple-50/60 border border-purple-200/60 rounded-xl p-2.5 text-[11px] font-semibold text-purple-900 flex items-center gap-2">
+        <SubjectCard
+          emoji={artSubject.emoji}
+          title={t(artSubject.labelKey)}
+          description={t(artSubject.descKey)}
+          href={artSubject.href}
+          ctaLabel="Vào Góc Vẽ"
+          borderClass="border-purple-100"
+          tileClass="from-purple-50 to-purple-100/60"
+          ctaClass="bg-art-accent shadow-purple-500/20 hover:opacity-90"
+          badge={readyBadge("border-purple-200 bg-purple-50 text-purple-600")}
+          info={
+            <div className="flex w-full items-center gap-2 rounded-lg border border-purple-200/60 bg-purple-50/60 px-2 py-1.5 text-[11px] font-semibold text-purple-900">
               <span>🖍️</span>
               <span>Thêm hoạt động vẽ & sáng tạo sẽ ra mắt tiếp theo</span>
             </div>
-          </div>
-          <div className="pt-5 mt-4 border-t border-gray-100">
-            <Link
-              href={artSubject.href}
-              className="w-full py-3 px-4 rounded-xl bg-art-accent hover:opacity-90 text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-md shadow-purple-500/20 active:scale-95 transition-all"
-            >
-              <span>Vào Góc Vẽ</span>
-              <ArrowRight className="size-4" />
-            </Link>
-          </div>
-        </div>
+          }
+        />
       </div>
     </section>
   );
