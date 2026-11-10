@@ -5,13 +5,15 @@ import Link from "next/link";
 import { ArrowLeft, Heart, Pause, Play, RotateCcw, Volume2 } from "lucide-react";
 import {
   EMPTY_FLAPPY_BEST,
+  FLAPPY_CONTENTS,
   FLAPPY_DIFFICULTIES,
   FLAPPY_RULES,
   getFlappyCoinReward,
   loadFlappyBest,
-  pickGateWords,
+  pickGateItems,
   saveFlappyBest,
-  type FlappyAnimal,
+  type FlappyContent,
+  type FlappyItem,
   type FlappyBestScores,
   type FlappyDifficulty,
   type FlappyRules,
@@ -35,6 +37,7 @@ const PLAY_H = H - GROUND_H;
 const BIRD_X = 96;
 const BIRD_R = 16;
 const HIT_R = 12;
+const ANIMAL_R = 26;
 const GRAVITY = 0.42;
 const FLAP_VELOCITY = -7.2;
 const MAX_FALL_SPEED = 9;
@@ -62,7 +65,14 @@ const RESERVED_HEIGHT_DESKTOP_REM = 11;
 const MIN_BOARD_REM = 20;
 const MAX_BOARD_REM = 56;
 
+const CONTENT_EMOJI: Record<FlappyContent, string> = {
+  animals: "🐾",
+  numbers: "🔢",
+  letters: "🔤",
+};
+
 const DIFFICULTY_EMOJI: Record<FlappyDifficulty, string> = {
+  beginner: "🐣",
   easy: "🐢",
   normal: "🐰",
   hard: "🐆",
@@ -71,10 +81,12 @@ const DIFFICULTY_EMOJI: Record<FlappyDifficulty, string> = {
 interface Gate {
   x: number;
   top: number;
-  target: FlappyAnimal;
-  decoy: FlappyAnimal;
+  target: FlappyItem;
+  decoy: FlappyItem;
   correctGap: 0 | 1;
   resolved: boolean;
+  /** Single-gap gates only: the animal in the middle has been touched. */
+  collected: boolean;
 }
 
 interface FloatText {
@@ -86,6 +98,9 @@ interface FloatText {
 }
 
 interface GameState {
+  content: FlappyContent;
+  /** Canvas font-family for digits and letters; CSS variables do not resolve inside canvas. */
+  glyphFont: string;
   birdY: number;
   vel: number;
   started: boolean;
@@ -102,9 +117,14 @@ interface GameState {
 interface GameEvents {
   onScore: (score: number) => void;
   onLives: (lives: number) => void;
-  onTarget: (animal: FlappyAnimal) => void;
+  onTarget: (item: FlappyItem) => void;
   onEnd: (score: number) => void;
 }
+
+const getGlyphFont = () => {
+  const heading = getComputedStyle(document.documentElement).getPropertyValue("--font-heading").trim();
+  return heading ? `${heading}, sans-serif` : "sans-serif";
+};
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
@@ -117,12 +137,13 @@ const circleHitsRect = (cx: number, cy: number, r: number, rx: number, ry: numbe
 const gapTop = (gate: Gate, rules: FlappyRules, index: 0 | 1) =>
   gate.top + index * (rules.gapHeight + MID_H);
 
-function createGate(x: number, rules: FlappyRules, previousTargetId?: string): Gate {
-  const slack = PLAY_H - 2 * rules.gapHeight - MID_H;
+function createGate(x: number, rules: FlappyRules, content: FlappyContent, previousTargetId?: string): Gate {
+  const openingsHeight = rules.layout === "single" ? rules.gapHeight : 2 * rules.gapHeight + MID_H;
+  const slack = PLAY_H - openingsHeight;
   const jitter = slack * 0.3;
   const top = clamp(slack / 2 + (Math.random() * 2 - 1) * jitter, MIN_PIPE_H, slack - MIN_PIPE_H);
-  const { target, decoy } = pickGateWords(previousTargetId);
-  return { x, top, target, decoy, correctGap: Math.random() < 0.5 ? 0 : 1, resolved: false };
+  const { target, decoy } = pickGateItems(content, previousTargetId);
+  return { x, top, target, decoy, correctGap: Math.random() < 0.5 ? 0 : 1, resolved: false, collected: false };
 }
 
 function ensureGates(g: GameState, rules: FlappyRules) {
@@ -130,12 +151,14 @@ function ensureGates(g: GameState, rules: FlappyRules) {
     const last = g.gates[g.gates.length - 1];
     const x = last ? last.x + GATE_SPACING : W + FIRST_GATE_OFFSET;
     if (x > W + GATE_SPACING) return;
-    g.gates.push(createGate(x, rules, last?.target.id));
+    g.gates.push(createGate(x, rules, g.content, last?.target.id));
   }
 }
 
-function createGame(rules: FlappyRules): GameState {
+function createGame(rules: FlappyRules, content: FlappyContent, glyphFont: string): GameState {
   const g: GameState = {
+    content,
+    glyphFont,
     birdY: PLAY_H / 2,
     vel: 0,
     started: false,
@@ -155,12 +178,24 @@ function createGame(rules: FlappyRules): GameState {
 function hitsGate(g: GameState, gate: Gate, rules: FlappyRules) {
   if (BIRD_X + HIT_R <= gate.x || BIRD_X - HIT_R >= gate.x + PIPE_W) return false;
   const gap1Top = gapTop(gate, rules, 1);
-  const rects: [number, number][] = [
-    [0, gate.top],
-    [gate.top + rules.gapHeight, gap1Top],
-    [gap1Top + rules.gapHeight, PLAY_H],
-  ];
+  const rects: [number, number][] =
+    rules.layout === "single"
+      ? [
+          [0, gate.top],
+          [gate.top + rules.gapHeight, PLAY_H],
+        ]
+      : [
+          [0, gate.top],
+          [gate.top + rules.gapHeight, gap1Top],
+          [gap1Top + rules.gapHeight, PLAY_H],
+        ];
   return rects.some(([from, to]) => circleHitsRect(BIRD_X, g.birdY, HIT_R, gate.x, from, PIPE_W, to - from));
+}
+
+function touchesAnimal(g: GameState, gate: Gate, rules: FlappyRules) {
+  const dx = BIRD_X - (gate.x + PIPE_W / 2);
+  const dy = g.birdY - (gate.top + rules.gapHeight / 2);
+  return dx * dx + dy * dy < (HIT_R + ANIMAL_R) ** 2;
 }
 
 function gapIndexAt(gate: Gate, rules: FlappyRules, y: number): 0 | 1 | -1 {
@@ -228,9 +263,17 @@ function stepGame(g: GameState, rules: FlappyRules, delta: number, labels: { wro
       return;
     }
 
+    if (rules.layout === "single" && !gate.collected && touchesAnimal(g, gate, rules)) {
+      gate.collected = true;
+      g.score += 1;
+      ev.onScore(g.score);
+      playCorrectSound();
+      addFloat(g, `+1 ${labels.correct}`, "#2e7d32");
+    }
+
     if (!gate.resolved && gate.x + PIPE_W / 2 <= BIRD_X) {
       gate.resolved = true;
-      if (!invulnerable) {
+      if (rules.layout === "double" && !invulnerable) {
         if (gapIndexAt(gate, rules, g.birdY) === gate.correctGap) {
           g.score += 1;
           ev.onScore(g.score);
@@ -247,6 +290,18 @@ function stepGame(g: GameState, rules: FlappyRules, delta: number, labels: { wro
 
   if (!invulnerable && g.birdY + BIRD_R >= PLAY_H) {
     loseLife(g, "ground", labels.wrong, ev);
+  }
+}
+
+function drawItem(ctx: CanvasRenderingContext2D, item: FlappyItem, cx: number, cy: number, size: number, glyphFont: string) {
+  ctx.fillStyle = "#000";
+  if (item.isGlyph) {
+    ctx.font = `900 ${size + 4}px ${glyphFont}`;
+    ctx.fillStyle = "#1565c0";
+    ctx.fillText(item.display, cx, cy + 2);
+  } else {
+    ctx.font = `${size}px ${EMOJI_FONT}`;
+    ctx.fillText(item.display, cx, cy + 2);
   }
 }
 
@@ -293,6 +348,21 @@ function drawScene(ctx: CanvasRenderingContext2D, g: GameState, rules: FlappyRul
   ctx.globalAlpha = 1;
 
   for (const gate of g.gates) {
+    if (rules.layout === "single") {
+      drawPipeSegment(ctx, gate.x, 0, gate.top, "bottom");
+      drawPipeSegment(ctx, gate.x, gate.top + rules.gapHeight, PLAY_H - gate.top - rules.gapHeight, "top");
+      if (!gate.collected) {
+        const cx = gate.x + PIPE_W / 2;
+        const cy = gate.top + rules.gapHeight / 2 + Math.sin(g.time / 300) * 4;
+        ctx.fillStyle = "rgba(255,255,255,0.9)";
+        ctx.beginPath();
+        ctx.arc(cx, cy, ANIMAL_R + 4, 0, Math.PI * 2);
+        ctx.fill();
+        drawItem(ctx, gate.target, cx, cy, 38, g.glyphFont);
+      }
+      continue;
+    }
+
     const gap0 = gapTop(gate, rules, 0);
     const gap1 = gapTop(gate, rules, 1);
     drawPipeSegment(ctx, gate.x, 0, gate.top, "bottom");
@@ -307,9 +377,7 @@ function drawScene(ctx: CanvasRenderingContext2D, g: GameState, rules: FlappyRul
       ctx.beginPath();
       ctx.arc(cx, cy, 25, 0, Math.PI * 2);
       ctx.fill();
-      ctx.font = `34px ${EMOJI_FONT}`;
-      ctx.fillStyle = "#000";
-      ctx.fillText(animals[index].emoji, cx, cy + 2);
+      drawItem(ctx, animals[index], cx, cy, 34, g.glyphFont);
     });
   }
 
@@ -363,11 +431,12 @@ export default function FlappyBirdPage() {
 
   const [phase, setPhase] = useState<Phase>("intro");
   const [difficulty, setDifficulty] = useState<FlappyDifficulty>("normal");
+  const [content, setContent] = useState<FlappyContent>("animals");
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(0);
   const [started, setStarted] = useState(false);
   const [paused, setPaused] = useState(false);
-  const [target, setTarget] = useState<FlappyAnimal | null>(null);
+  const [target, setTarget] = useState<FlappyItem | null>(null);
   const [best, setBest] = useState<FlappyBestScores>(EMPTY_FLAPPY_BEST);
   const [result, setResult] = useState<GameResult>({ score: 0, coins: 0, newRecord: false });
 
@@ -387,12 +456,19 @@ export default function FlappyBirdPage() {
   });
 
   useEffect(() => {
-    const loadBest = setTimeout(() => setBest(loadFlappyBest()), 0);
+    const loadBest = setTimeout(() => {
+      const saved = loadFlappyBest();
+      setBest(saved);
+      // First-time players start on the gentlest mode.
+      if (Object.values(saved).every((scores) => Object.values(scores).every((score) => score === 0))) {
+        setDifficulty("beginner");
+      }
+    }, 0);
     return () => clearTimeout(loadBest);
   }, []);
 
   const startGame = () => {
-    const game = createGame(FLAPPY_RULES[difficulty]);
+    const game = createGame(FLAPPY_RULES[difficulty], content, getGlyphFont());
     gameRef.current = game;
     pausedRef.current = false;
     setPaused(false);
@@ -415,7 +491,7 @@ export default function FlappyBirdPage() {
       g.started = true;
       setStarted(true);
       const next = g.gates.find((gate) => !gate.resolved);
-      if (next) speakRef.current(next.target.word, "en");
+      if (next) speakRef.current(next.target.speak, "en");
     }
     g.vel = FLAP_VELOCITY;
   };
@@ -435,16 +511,19 @@ export default function FlappyBirdPage() {
     const events: GameEvents = {
       onScore: setScore,
       onLives: setLives,
-      onTarget: (animal) => {
-        setTarget(animal);
-        speakRef.current(animal.word, "en");
+      onTarget: (item) => {
+        setTarget(item);
+        speakRef.current(item.speak, "en");
       },
       onEnd: (finalScore) => {
         const coins = getFlappyCoinReward(difficulty, finalScore);
         const earned = coins > 0 ? addCoinsRef.current(coins) : 0;
-        const newRecord = finalScore > bestRef.current[difficulty];
+        const newRecord = finalScore > bestRef.current[content][difficulty];
         if (newRecord) {
-          const nextBest = { ...bestRef.current, [difficulty]: finalScore };
+          const nextBest = {
+            ...bestRef.current,
+            [content]: { ...bestRef.current[content], [difficulty]: finalScore },
+          };
           setBest(nextBest);
           saveFlappyBest(nextBest);
           playVictorySound();
@@ -467,7 +546,7 @@ export default function FlappyBirdPage() {
     };
     raf = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(raf);
-  }, [phase, difficulty]);
+  }, [phase, difficulty, content]);
 
   useEffect(() => {
     if (phase !== "playing") return;
@@ -508,8 +587,37 @@ export default function FlappyBirdPage() {
         <p className="mt-3 text-sm font-semibold text-muted-foreground sm:text-base">{t("flappy_intro")}</p>
 
         <div className="mt-6 w-full">
+          <p className="mb-2 text-sm font-extrabold text-foreground">{t("flappy_pick_content")}</p>
+          <div className="grid grid-cols-3 gap-2 sm:gap-3" role="radiogroup" aria-label={t("flappy_pick_content")}>
+            {FLAPPY_CONTENTS.map((c) => {
+              const selected = c === content;
+              return (
+                <button
+                  key={c}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  onClick={() => setContent(c)}
+                  className={cn(
+                    "flex flex-col items-center gap-0.5 rounded-2xl border-2 px-2 py-2.5 transition-all active:scale-95",
+                    selected ? "border-primary bg-primary/10 shadow-md" : "border-border bg-card hover:bg-accent"
+                  )}
+                >
+                  <span className="text-2xl" aria-hidden>
+                    {CONTENT_EMOJI[c]}
+                  </span>
+                  <span className="font-heading text-sm font-extrabold text-foreground">
+                    {t(`flappy_content_${c}`)}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="mt-4 w-full">
           <p className="mb-2 text-sm font-extrabold text-foreground">{t("zoo_pick_difficulty")}</p>
-          <div className="grid grid-cols-3 gap-2 sm:gap-3" role="radiogroup" aria-label={t("zoo_pick_difficulty")}>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3" role="radiogroup" aria-label={t("zoo_pick_difficulty")}>
             {FLAPPY_DIFFICULTIES.map((d) => {
               const selected = d === difficulty;
               return (
@@ -537,8 +645,8 @@ export default function FlappyBirdPage() {
                     <Heart className="size-3 fill-current" />
                     {FLAPPY_RULES[d].lives}
                   </span>
-                  {best[d] > 0 && (
-                    <span className="text-xs font-bold text-amber-600 dark:text-amber-400">🏆 {best[d]}</span>
+                  {best[content][d] > 0 && (
+                    <span className="text-xs font-bold text-amber-600 dark:text-amber-400">🏆 {best[content][d]}</span>
                   )}
                 </button>
               );
@@ -578,7 +686,7 @@ export default function FlappyBirdPage() {
             <div className="text-sm font-bold text-muted-foreground">{t("flappy_score")}</div>
           </div>
           <div>
-            <div className="font-heading text-3xl font-black text-amber-500">🏆 {best[difficulty]}</div>
+            <div className="font-heading text-3xl font-black text-amber-500">🏆 {best[content][difficulty]}</div>
             <div className="text-sm font-bold text-muted-foreground">{t("flappy_best")}</div>
           </div>
         </div>
@@ -680,13 +788,13 @@ export default function FlappyBirdPage() {
 
           <button
             type="button"
-            onClick={() => target && speak(target.word, "en")}
+            onClick={() => target && speak(target.speak, "en")}
             onPointerDown={stopFlap}
             className="pointer-events-auto flex items-center gap-2 rounded-full bg-amber-100/95 px-4 py-2 text-sm font-extrabold text-amber-800 shadow-md transition-all active:scale-95"
           >
             <Volume2 className="size-4" />
             <span>
-              {t("flappy_find")}: <span className="font-heading text-lg font-black">{target?.word}</span>
+              {t("flappy_find")}: <span className="font-heading text-lg font-black">{target?.label}</span>
             </span>
           </button>
         </div>
