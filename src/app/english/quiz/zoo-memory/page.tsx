@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Pause, Play, RotateCcw, Star, Timer } from "lucide-react";
 import {
@@ -20,6 +20,7 @@ import {
 import { useVoice } from "@/lib/voice-context";
 import { useLanguage } from "@/lib/language-context";
 import { useReward } from "@/lib/reward-context";
+import { useIsWide } from "@/lib/use-is-wide";
 import { playCorrectSound, playVictorySound, playWrongSound } from "@/lib/sound-effects";
 import { ConfettiEffect } from "@/components/english/quiz/confetti-effect";
 import { GoldCoin } from "@/components/gold-coin";
@@ -38,26 +39,11 @@ const CARD_GAP_REM = 0.5;
 const BOARD_PADDING_REM = 0.5;
 const MIN_BOARD_REM = 16;
 // Viewport height taken by the site header, game header and stats around the board.
-const RESERVED_HEIGHT_NARROW_REM = 26;
+const RESERVED_HEIGHT_NARROW_REM = 18;
 const RESERVED_HEIGHT_WIDE_REM = 19;
 
 const getColumns = (count: number, wide: boolean) =>
   (wide ? COLUMNS_WIDE : COLUMNS_NARROW)[count] ?? (wide ? 6 : 4);
-
-const WIDE_QUERY = "(min-width: 640px)";
-
-const subscribeWide = (onChange: () => void) => {
-  const query = window.matchMedia(WIDE_QUERY);
-  query.addEventListener("change", onChange);
-  return () => query.removeEventListener("change", onChange);
-};
-
-const useIsWide = () =>
-  useSyncExternalStore(
-    subscribeWide,
-    () => window.matchMedia(WIDE_QUERY).matches,
-    () => false
-  );
 
 const FLIP_BACK_DELAY_MS = 1000;
 const MATCH_DELAY_MS = 500;

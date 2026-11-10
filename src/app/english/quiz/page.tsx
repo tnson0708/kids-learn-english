@@ -11,7 +11,7 @@ export default function QuizSelectionPage() {
   const { t } = useLanguage();
 
   const modes: {
-    id: QuizMode | "zoo";
+    id: QuizMode | "zoo" | "flappy";
     href?: string;
     titleKey: TranslationKey;
     descKey: TranslationKey;
@@ -25,6 +25,14 @@ export default function QuizSelectionPage() {
       descKey: "quiz_desc_zoo",
       emoji: "🦁",
       gradient: "from-emerald-200 via-lime-100 to-amber-200",
+    },
+    {
+      id: "flappy",
+      href: "/english/quiz/flappy-bird",
+      titleKey: "quiz_mode_flappy",
+      descKey: "quiz_desc_flappy",
+      emoji: "🐦",
+      gradient: "from-sky-200 via-cyan-100 to-lime-200",
     },
     {
       id: "listen",
