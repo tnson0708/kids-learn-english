@@ -3,12 +3,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Gift, Home, ShieldCheck } from "lucide-react";
+import { Gift, Home, Menu } from "lucide-react";
 import { LanguageToggle } from "@/components/language-toggle";
 import { VoiceToggle } from "@/components/voice-toggle";
 import { VoiceEnabledToggle } from "@/components/voice-enabled-toggle";
 import { ParentPinModal } from "@/components/parent-pin-modal";
 import { ParentControlModal } from "@/components/parent-control-modal";
+import { MobileMenu } from "@/components/mobile-menu";
 import { GoldCoin } from "@/components/gold-coin";
 import { useLanguage } from "@/lib/language-context";
 import { useReward } from "@/lib/reward-context";
@@ -26,6 +27,7 @@ export function Nav() {
   const { t } = useLanguage();
   const { coins, rewardedItemIds } = useReward();
 
+  const [menuOpen, setMenuOpen] = useState(false);
   const [showPinModal, setShowPinModal] = useState(false);
   const [showParentModal, setShowParentModal] = useState(false);
 
@@ -42,13 +44,22 @@ export function Nav() {
       {/* Top Header */}
       <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 print:hidden">
         <div className="mx-auto flex h-16 sm:h-20 max-w-6xl items-center justify-between gap-2 px-3 sm:px-6">
+          <button
+            type="button"
+            onClick={() => setMenuOpen(true)}
+            aria-label={t("nav_menu")}
+            className="flex size-10 shrink-0 items-center justify-center rounded-full border bg-card text-foreground shadow-xs transition-all hover:bg-accent active:scale-95 lg:hidden"
+          >
+            <Menu className="size-5" />
+          </button>
+
           <Link
             href="/"
-            className="flex flex-col shrink-0 font-heading text-lg sm:text-xl font-black tracking-tight text-primary"
+            className="mr-auto flex flex-col shrink-0 font-heading text-lg sm:text-xl font-black tracking-tight text-primary lg:mr-0"
           >
             <span className="flex items-center gap-1.5">
               <span className="text-xl sm:text-2xl" aria-hidden>🦁</span>
-              <span className="hidden xs:inline sm:inline">{t("app_name")}</span>
+              <span>{t("app_name")}</span>
             </span>
             <span className="hidden text-[10px] font-semibold text-muted-foreground sm:block">
               {t("app_tagline")}
@@ -101,22 +112,17 @@ export function Nav() {
               </span>
             </Link>
 
-            {/* Parent Control Button (mobile/tablet fallback — desktop uses the nav link above) */}
-            <button
-              type="button"
-              onClick={handleOpenParentControl}
-              title={t("nav_parent_corner")}
-              className="flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2.5 py-1.5 text-xs font-extrabold text-primary transition-all hover:bg-primary/20 active:scale-95 lg:hidden"
-            >
-              <ShieldCheck className="size-4" />
-            </button>
-
             <VoiceEnabledToggle />
-            <VoiceToggle />
-            <LanguageToggle />
+            {/* Voice gender and language live in the mobile menu below the lg breakpoint */}
+            <div className="hidden items-center gap-2 lg:flex">
+              <VoiceToggle />
+              <LanguageToggle />
+            </div>
           </div>
         </div>
       </header>
+
+      <MobileMenu open={menuOpen} onOpenChange={setMenuOpen} onOpenParentCorner={handleOpenParentControl} />
 
       {/* Parent Modals */}
       <ParentPinModal

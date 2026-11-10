@@ -47,23 +47,34 @@ export function SubjectHeader({ subjectId }: { subjectId: string }) {
 
   const accent = ACCENT_CLASSES[subject.accent];
   const isSubpage = pathname !== subject.href;
+  const activeLesson = subject.lessons?.find(
+    (lesson) => pathname === lesson.href || pathname.startsWith(`${lesson.href}/`)
+  );
 
   return (
     <div className="border-b bg-card/60 print:hidden">
-      <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center gap-3 px-4 py-3">
+      <div className="mx-auto flex w-full max-w-5xl items-center gap-2 px-3 py-2 sm:flex-wrap sm:gap-3 sm:px-4 sm:py-3">
         <Link
           href={subject.href}
           className="flex items-center gap-2 hover:opacity-80 transition-opacity"
           title={`Trang chủ môn ${t(subject.labelKey)}`}
         >
           <span className={cn("size-3 rounded-full", accent.dot)} aria-hidden />
-          <span className="font-heading text-lg font-black text-foreground">
+          <span className="font-heading text-base font-black text-foreground sm:text-lg">
             {subject.emoji} {t(subject.labelKey)}
           </span>
         </Link>
 
+        {/* Phones: just the current lesson; the full lesson list lives in the hamburger menu */}
+        {activeLesson && (
+          <span className="flex min-w-0 items-center gap-2 text-sm font-bold text-muted-foreground sm:hidden">
+            <span aria-hidden>›</span>
+            <span className="truncate">{t(activeLesson.labelKey)}</span>
+          </span>
+        )}
+
         {subject.lessons && subject.lessons.length > 0 && (
-          <nav className="flex flex-1 flex-wrap items-center gap-2">
+          <nav className="hidden flex-1 flex-wrap items-center gap-2 sm:flex">
             {subject.lessons.map((lesson) => {
               const active = pathname === lesson.href || pathname.startsWith(`${lesson.href}/`);
               return (
@@ -84,7 +95,7 @@ export function SubjectHeader({ subjectId }: { subjectId: string }) {
           </nav>
         )}
 
-        <div className="ml-auto flex items-center gap-3">
+        <div className="ml-auto hidden items-center gap-3 lg:flex">
           {isSubpage ? (
             <>
               <Link
